@@ -4,7 +4,7 @@
  */
 
 import 'dotenv/config'
-
+console.log('GitHub token:', process.env.GITHUB_TOKEN?.slice(0, 10))
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN
 const BASE_URL = 'https://api.github.com'
 
