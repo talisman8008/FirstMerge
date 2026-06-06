@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts'
+import html2canvas from 'html2canvas'
 
 import Navbar from '../components/Navbar.jsx'
 import supabase from '../lib/supabase.js'
@@ -77,6 +78,11 @@ export default function Dashboard({ user, signIn, signOut }) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [updatingId, setUpdatingId] = useState(null)
+  
+  // Share modal state
+  const [showShareModal, setShowShareModal] = useState(false)
+  const [justMergedIssue, setJustMergedIssue] = useState(null)
+  const cardRef = useRef(null)
 
   // ── Fetch dashboard data ────────────────────────────────────────────────
 
@@ -147,6 +153,9 @@ export default function Dashboard({ user, signIn, signOut }) {
 
       // ── First PR Celebration! ──
       if (dashData?.totalDone === 0 && newStatus === 'done') {
+        const markedIssue = dashData.issues.find(i => i.id === issueId)
+        setJustMergedIssue(markedIssue)
+        setShowShareModal(true)
         confetti({
           particleCount: 150,
           spread: 80,
@@ -201,6 +210,25 @@ export default function Dashboard({ user, signIn, signOut }) {
       console.error('[Dashboard] Seed failed:', err.message)
       setError(err.message)
       setLoading(false)
+    }
+  }
+
+  // ── Download Card ───────────────────────────────────────────────────────
+
+  const handleDownloadCard = async () => {
+    if (cardRef.current) {
+      try {
+        const canvas = await html2canvas(cardRef.current, { 
+          backgroundColor: '#0d1117',
+          scale: 2 // higher res
+        })
+        const link = document.createElement('a')
+        link.download = 'firstmerge-pr-celebration.png'
+        link.href = canvas.toDataURL('image/png')
+        link.click()
+      } catch (err) {
+        console.error('Failed to generate image:', err)
+      }
     }
   }
 
@@ -406,6 +434,59 @@ export default function Dashboard({ user, signIn, signOut }) {
           </>
         )}
       </div>
+
+      {/* ── Share Modal ── */}
+      {showShareModal && justMergedIssue && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+          <div className="bg-[#161b22] border border-[#30363d] rounded-xl p-6 shadow-2xl max-w-sm w-full">
+            {/* The actual card we screenshot */}
+            <div 
+              ref={cardRef} 
+              className="p-8 rounded-lg bg-gradient-to-br from-[#0d1117] to-[#161b22] border border-[#30363d] text-center mb-6 flex flex-col items-center"
+            >
+              <div className="w-12 h-12 bg-[#238636] rounded-xl flex items-center justify-center mb-4 shadow-[0_0_15px_rgba(35,134,54,0.5)]">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                </svg>
+              </div>
+              <h2 className="text-2xl font-bold text-white mb-1" style={{ fontFamily: "'Space Mono', monospace" }}>
+                FirstMerge
+              </h2>
+              <p className="text-sm text-[#8b949e] mb-6" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+                @{user?.user_metadata?.user_name || 'developer'}
+              </p>
+              
+              <div className="bg-[#0d1117] border border-[#30363d] rounded-md px-4 py-3 w-full mb-4 text-center overflow-hidden">
+                <p className="text-xs text-[#8b949e] mb-1" style={{ fontFamily: "'Space Mono', monospace" }}>MERGED ISSUE</p>
+                <p className="text-[#58a6ff] font-semibold text-sm truncate" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+                  {justMergedIssue.repo_name}
+                </p>
+              </div>
+              
+              <p className="text-[#3fb950] font-bold text-lg" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+                Just got my PR merged! 🎉
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={handleDownloadCard}
+                className="flex-1 py-2 bg-[#238636] text-white rounded-md font-semibold text-sm hover:bg-[#2ea043] transition-colors"
+                style={{ fontFamily: "'DM Sans', sans-serif" }}
+              >
+                Download Card
+              </button>
+              <button
+                onClick={() => setShowShareModal(false)}
+                className="px-4 py-2 bg-[#21262d] text-[#c9d1d9] border border-[#30363d] rounded-md text-sm font-semibold hover:bg-[#30363d] transition-colors"
+                style={{ fontFamily: "'DM Sans', sans-serif" }}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

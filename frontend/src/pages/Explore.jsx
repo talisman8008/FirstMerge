@@ -57,7 +57,7 @@ export default function Explore() {
   // Synchronize sidebar apply with hook fetching
   useEffect(() => {
     setHookFilters({
-      language: sidebarFilters.languages[0] || 'JavaScript',
+      language: sidebarFilters.languages.join(',') || 'JavaScript',
       skillLevel: sidebarFilters.skillLevel.toLowerCase() || 'beginner',
       page: 1,
       minScore: sidebarFilters.minScore,

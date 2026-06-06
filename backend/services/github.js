@@ -35,7 +35,7 @@ async function ghFetch(path, params = {}) {
 export async function searchIssues(language, skillLevel, page = 1) {
   try {
     let q = `label:"good first issue" language:${language} state:open`
-    if (skillLevel === 'beginner') q += ' -label:complexity:high'
+    if (skillLevel?.toLowerCase() === 'beginner') q += ' label:"good-first-issue" -label:complexity:high'
 
     const data = await ghFetch('/search/issues', {
       q,
@@ -55,6 +55,7 @@ export async function searchIssues(language, skillLevel, page = 1) {
       created_at: issue.created_at,
       comments: issue.comments,
       number: issue.number,
+      language: language,
     }))
   } catch (err) {
     console.error('[github.searchIssues] failed:', err.message)

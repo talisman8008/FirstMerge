@@ -89,12 +89,29 @@ router.get('/', async (req, res) => {
   const page       = parseInt(req.query.page ?? '1', 10)
 
   try {
-    // 1. Fetch raw issues from GitHub search
-    const rawIssues = await searchIssues(language, skillLevel, page)
+    // 1. Fetch raw issues from GitHub search for each language
+    const languages = language.split(',').map(l => l.trim()).filter(Boolean)
+    if (languages.length === 0) languages.push('JavaScript') // fallback
+
+    const results = await Promise.all(
+      languages.map(lang => searchIssues(lang, skillLevel, page))
+    )
+    
+    // Merge and sort all results by created_at descending
+    let rawIssues = results.flat().sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
 
     if (!rawIssues.length) {
       return res.json({ data: [], error: null, cached: false })
     }
+
+    // Filter to keep max 2 issues per repository
+    const repoCounts = {}
+    rawIssues = rawIssues.filter((issue) => {
+      const { owner, repo } = parseOwnerRepo(issue.repository_url)
+      const repoFullName = `${owner}/${repo}`
+      repoCounts[repoFullName] = (repoCounts[repoFullName] || 0) + 1
+      return repoCounts[repoFullName] <= 2
+    })
 
     // 2. Cap to MAX_PER_REQUEST to avoid rate limit cascade
     const slice = rawIssues.slice(0, MAX_PER_REQUEST)
@@ -126,7 +143,7 @@ router.get('/', async (req, res) => {
           title:            issue.title,
           url:              issue.html_url,
           repo_name:        repoFullName,
-          language,
+          language:         issue.language,
           created_at:       issue.created_at,
           comments:         issue.comments,
           number:           issue.number,
