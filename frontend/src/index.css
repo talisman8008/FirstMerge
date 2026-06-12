@@ -18,6 +18,11 @@
   --color-accent-amber: var(--accent-amber);
   --color-accent-red: var(--red);
 
+  --color-dashboard-bg: #fffbf4;
+  --color-dashboard-nav: #EDEAE0;
+  --color-dashboard-text: #000000;
+  --color-dashboard-muted: #484848;
+
   --font-display: 'Space Grotesk', sans-serif;
   --font-body: 'Space Grotesk', sans-serif;
   --font-mono: 'Space Mono', monospace;

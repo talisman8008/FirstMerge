@@ -11,6 +11,7 @@
 
 import { Router } from 'express'
 import { createClient } from '@supabase/supabase-js'
+import { getUserProfile, getUserActivity } from '../services/github.js'
 
 const router = Router()
 
@@ -114,6 +115,42 @@ router.get('/dashboard', requireAuth, async (req, res) => {
     })
   } catch (err) {
     console.error('[user] GET /dashboard failed:', err.message)
+    return res.status(500).json({ error: err.message || 'Internal server error' })
+  }
+})
+
+// ── GET /api/user/github-profile ─────────────────────────────────────────────
+
+router.get('/github-profile', requireAuth, async (req, res) => {
+  try {
+    const userMeta = req.user.user_metadata
+    const username = userMeta?.user_name || userMeta?.preferred_username
+
+    if (!username) {
+      return res.status(400).json({ error: 'GitHub username not found in user metadata.' })
+    }
+
+    const [profile, activity] = await Promise.all([
+      getUserProfile(username),
+      getUserActivity(username),
+    ])
+
+    if (!profile) {
+      return res.status(404).json({ error: 'GitHub profile not found.' })
+    }
+
+    return res.json({
+      profile,
+      activity: activity || {
+        languages: [],
+        totalPRs: 0,
+        totalIssuesClosed: 0,
+        heatmap: [],
+        recentActivity: []
+      }
+    })
+  } catch (err) {
+    console.error('[user] GET /github-profile failed:', err.message)
     return res.status(500).json({ error: err.message || 'Internal server error' })
   }
 })

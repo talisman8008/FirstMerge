@@ -1,73 +1,203 @@
-import { useState, useEffect, useRef, useMemo } from 'react'
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts'
-import html2canvas from 'html2canvas'
-
+import { useState, useEffect } from 'react'
+import { PieChart, Pie, Cell, AreaChart, Area, ResponsiveContainer, Tooltip } from 'recharts'
 import Navbar from '../components/Navbar.jsx'
 import supabase from '../lib/supabase.js'
-import confetti from 'canvas-confetti'
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000'
 
-// ── Custom tooltip for chart ──────────────────────────────────────────────────
-function CustomTooltip({ active, payload }) {
-  if (!active || !payload?.length) return null
+const Spinner = () => (
+  <div className="flex items-center justify-center py-20">
+    <div className="w-6 h-6 rounded-full border-2 border-[var(--color-dashboard-muted)] border-t-[var(--color-dashboard-text)] animate-spin" />
+  </div>
+)
+
+function Heatmap({ data, totalIssues, activeDays }) {
+  const [tooltip, setTooltip] = useState({ show: false, x: 0, y: 0, text: '' });
+
+  const plotData = (!data || data.length === 0) 
+    ? Array.from({ length: 365 }, () => ({ count: 0, date: '' }))
+    : data;
+
+  // Match exact number of days per month (assuming current year)
+  const year = new Date().getFullYear();
+  const isLeap = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+  const daysInMonth = [31, isLeap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  const months = [];
+  let currentDayIndex = 0;
+
+  daysInMonth.forEach((numDays) => {
+    const monthDays = plotData.slice(currentDayIndex, currentDayIndex + numDays);
+    currentDayIndex += numDays;
+
+    const monthWeeks = [];
+    for (let i = 0; i < monthDays.length; i += 7) {
+      monthWeeks.push(monthDays.slice(i, i + 7));
+    }
+    months.push(monthWeeks);
+  });
+
+  const monthLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+  const formatTooltipText = (dateStr, count) => {
+    if (!dateStr) return 'No data';
+    const parts = dateStr.split('-');
+    if (parts.length !== 3) return 'No data';
+    
+    const monthsFull = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
+    const monthName = monthsFull[parseInt(parts[1], 10) - 1];
+    const day = parseInt(parts[2], 10);
+    
+    let suffix = 'th';
+    if (day % 10 === 1 && day !== 11) suffix = 'st';
+    else if (day % 10 === 2 && day !== 12) suffix = 'nd';
+    else if (day % 10 === 3 && day !== 13) suffix = 'rd';
+    
+    const countText = count === 1 ? '1 contribution' : `${count} contributions`;
+    return `${countText} on ${monthName} ${day}${suffix}`;
+  };
+
   return (
-    <div className="bg-[var(--canvas)] border border-[rgba(255,255,255,0.08)] rounded-lg px-3 py-2 shadow-sm">
-      <p className="text-xs text-[var(--text)]">
-        <span className="font-semibold">{payload[0].payload.name}:</span> {payload[0].value}
-      </p>
+    <div className="w-full flex flex-col relative">
+      {/* Header */}
+      <div className="flex justify-between items-center mb-4 text-[13px] text-[#908989] px-2">
+        <div>
+          <span className="text-[18px] text-black font-semibold mr-1">{totalIssues || 0}</span> 
+          issues solved in the past one year
+        </div>
+        <div className="flex gap-4">
+          <span>Total active days: {activeDays || 0}</span>
+
+        </div>
+      </div>
+
+      {/* Grid of Months */}
+      <div className="flex justify-between overflow-x-auto pb-2 w-full custom-scrollbar" onMouseLeave={() => setTooltip(prev => ({ ...prev, show: false }))}>
+        {months.map((monthWeeks, mIdx) => (
+          <div key={mIdx} className="flex flex-col items-center gap-1">
+            <div className="flex gap-[3px]">
+              {monthWeeks.map((week, wIdx) => (
+                <div key={wIdx} className="flex flex-col gap-[3px]">
+                  {week.map((day, dIdx) => {
+                    let bg = 'bg-[#e0e0e0]'; // empty
+                    if (day.count === 1) bg = 'bg-[#9be9a8]';
+                    if (day.count === 2) bg = 'bg-[#40c463]';
+                    if (day.count >= 3) bg = 'bg-[#30a14e]';
+                    
+                    const tooltipText = formatTooltipText(day.date, day.count);
+                    
+                    return (
+                      <div 
+                        key={dIdx} 
+                        className={`w-[12px] h-[12px] rounded-[2px] ${bg} hover:ring-[1.5px] hover:ring-black hover:scale-110 transition-all duration-100 cursor-pointer`} 
+                        onMouseEnter={(e) => setTooltip({ show: true, x: e.clientX, y: e.clientY, text: tooltipText })}
+                        onMouseMove={(e) => setTooltip({ show: true, x: e.clientX, y: e.clientY, text: tooltipText })}
+                      />
+                    )
+                  })}
+                </div>
+              ))}
+            </div>
+            {/* Month Label directly under the block */}
+            <span className="text-[11px] text-[#908989] mt-1">{monthLabels[mIdx]}</span>
+          </div>
+        ))}
+
+        {/* Floating Tooltip */}
+        {tooltip.show && (
+          <div 
+            className="fixed z-[100] bg-gray-900 text-white text-[11px] font-medium px-2 py-1.5 rounded shadow-xl pointer-events-none transform -translate-x-1/2 -translate-y-full whitespace-nowrap"
+            style={{ left: tooltip.x, top: tooltip.y - 12 }}
+          >
+            {tooltip.text}
+            <div className="absolute top-full left-1/2 -translate-x-1/2 border-[5px] border-transparent border-t-gray-900"></div>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
 
-// ── Spinner ───────────────────────────────────────────────────────────────────
-const Spinner = () => (
-  <div className="flex items-center justify-center py-20">
-    <div className="w-6 h-6 rounded-full border-2 border-[var(--border)] border-t-[var(--text)] animate-spin" />
+const DashboardSkeleton = () => (
+  <div className="max-w-[2880px] mx-auto px-8 py-8 flex flex-col md:flex-row gap-8 w-full animate-pulse">
+    {/* Left Sidebar Skeleton */}
+    <div className="w-full md:w-[300px] flex-shrink-0 flex flex-col gap-8">
+      <div className="flex items-center gap-4">
+        <div className="w-20 h-20 bg-gray-200 rounded-2xl"></div>
+        <div className="space-y-2 flex-1">
+          <div className="h-5 bg-gray-200 rounded w-3/4"></div>
+          <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+        </div>
+      </div>
+      <div>
+        <div className="h-5 bg-gray-200 rounded w-1/2 mb-2"></div>
+        <div className="h-24 bg-gray-200 rounded-md w-full"></div>
+      </div>
+      <div className="border-t border-gray-200 pt-6 space-y-4">
+        <div className="h-5 bg-gray-200 rounded w-1/2 mb-4"></div>
+        <div className="flex justify-between"><div className="h-3 bg-gray-200 rounded w-1/3"></div><div className="h-3 bg-gray-200 rounded w-8"></div></div>
+        <div className="flex justify-between"><div className="h-3 bg-gray-200 rounded w-1/3"></div><div className="h-3 bg-gray-200 rounded w-8"></div></div>
+        <div className="flex justify-between"><div className="h-3 bg-gray-200 rounded w-1/3"></div><div className="h-3 bg-gray-200 rounded w-8"></div></div>
+      </div>
+    </div>
+
+    {/* Main Content Skeleton */}
+    <div className="flex-1 flex flex-col gap-6">
+      <div className="rounded-xl p-6 h-[250px] bg-gray-100 border border-gray-200"></div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="rounded-xl p-6 h-[200px] bg-gray-100 border border-gray-200 flex flex-col items-center justify-center gap-4">
+          <div className="h-6 bg-gray-200 rounded w-1/2"></div>
+          <div className="flex gap-8">
+            <div className="w-16 h-12 bg-gray-200 rounded"></div>
+            <div className="w-16 h-12 bg-gray-200 rounded"></div>
+          </div>
+        </div>
+        <div className="rounded-xl p-6 h-[200px] bg-gray-100 border border-gray-200 space-y-3">
+          <div className="h-6 bg-gray-200 rounded w-1/2 mb-4"></div>
+          <div className="h-8 bg-gray-200 rounded-sm w-full"></div>
+          <div className="h-8 bg-gray-200 rounded-sm w-11/12"></div>
+          <div className="h-8 bg-gray-200 rounded-sm w-full"></div>
+        </div>
+      </div>
+      <div className="rounded-xl p-6 h-[220px] bg-gray-100 border border-gray-200"></div>
+      <div className="rounded-xl p-6 h-[200px] bg-gray-100 border border-gray-200"></div>
+    </div>
   </div>
 )
 
-// ── Main component ────────────────────────────────────────────────────────────
 export default function Dashboard({ user, signIn, signOut }) {
   const [dashData, setDashData] = useState(null)
+  const [githubData, setGithubData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [updatingId, setUpdatingId] = useState(null)
-  const [animatedMergeRateOffset, setAnimatedMergeRateOffset] = useState(220)
-
-  const [showShareModal, setShowShareModal] = useState(false)
-  const [justMergedIssue, setJustMergedIssue] = useState(null)
-  const cardRef = useRef(null)
+  const [activeTab, setActiveTab] = useState('Saved')
 
   useEffect(() => {
-    if (!user) {
+    if (!user?.id) {
       setLoading(false)
       return
     }
 
-    async function loadDashboard() {
+    async function loadData() {
       try {
         setLoading(true)
-        setError(null)
-
         const { data: { session } } = await supabase.auth.getSession()
-        if (!session?.access_token) {
-          throw new Error('No active session. Please sign in again.')
+        if (!session?.access_token) throw new Error('No active session.')
+
+        const headers = { Authorization: `Bearer ${session.access_token}` }
+
+        const [dashRes, ghRes] = await Promise.all([
+          fetch(`${BACKEND_URL}/api/user/dashboard`, { headers }),
+          fetch(`${BACKEND_URL}/api/user/github-profile`, { headers })
+        ])
+
+        if (!dashRes.ok) throw new Error('Failed to load dashboard data')
+        const dData = await dashRes.json()
+        setDashData(dData)
+
+        if (ghRes.ok) {
+          const gData = await ghRes.json()
+          setGithubData(gData)
         }
-
-        const res = await fetch(`${BACKEND_URL}/api/user/dashboard`, {
-          headers: {
-            Authorization: `Bearer ${session.access_token}`,
-          },
-        })
-
-        const data = await res.json()
-
-        if (!res.ok) {
-          throw new Error(data.error || `Server returned ${res.status}`)
-        }
-
-        setDashData(data)
       } catch (err) {
         setError(err.message)
       } finally {
@@ -75,436 +205,275 @@ export default function Dashboard({ user, signIn, signOut }) {
       }
     }
 
-    loadDashboard()
-  }, [user])
-
-  useEffect(() => {
-    if (dashData) {
-      setTimeout(() => {
-        setAnimatedMergeRateOffset(220 - ((dashData.mergeRate || 0) / 100) * 220)
-      }, 50)
-    }
-  }, [dashData])
-
-  const handleStatusChange = async (issueId, newStatus) => {
-    try {
-      setUpdatingId(issueId)
-
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session?.access_token) throw new Error('No active session')
-
-      const res = await fetch(`${BACKEND_URL}/api/user/issues/${issueId}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({ status: newStatus }),
-      })
-
-      const updated = await res.json()
-
-      if (!res.ok) throw new Error(updated.error || 'Failed to update status')
-
-      // First PR Celebration
-      if (dashData?.totalDone === 0 && newStatus === 'done') {
-        const markedIssue = dashData.issues.find(i => i.id === issueId)
-        setJustMergedIssue(markedIssue)
-        setShowShareModal(true)
-        confetti({
-          particleCount: 150,
-          spread: 80,
-          origin: { y: 0.6 },
-          colors: ['#0F7B6C', '#2383E2', '#D9730D', '#E03E3E'], 
-        })
-      }
-
-      setDashData((prev) => {
-        if (!prev) return prev
-        const updatedIssues = prev.issues.map((issue) =>
-          issue.id === issueId ? { ...issue, status: newStatus } : issue,
-        )
-        const totalDone = updatedIssues.filter((i) => i.status === 'done').length
-        const totalSaved = updatedIssues.length
-        return {
-          ...prev,
-          issues: updatedIssues,
-          totalDone,
-          totalSaved,
-          mergeRate: totalSaved > 0 ? Math.round((totalDone / totalSaved) * 1000) / 10 : 0,
-        }
-      })
-    } catch (err) {
-      setError(err.message)
-    } finally {
-      setUpdatingId(null)
-    }
-  }
-
-  const handleSeedDemo = async () => {
-    try {
-      setLoading(true)
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session?.access_token) return
-      const res = await fetch(`${BACKEND_URL}/api/user/seed-demo`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${session.access_token}` },
-      })
-      if (!res.ok) throw new Error('Failed to seed demo data')
-      window.location.reload()
-    } catch (err) {
-      setError(err.message)
-      setLoading(false)
-    }
-  }
-
-  const handleClearDemo = async () => {
-    try {
-      setLoading(true)
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session?.access_token) return
-      const res = await fetch(`${BACKEND_URL}/api/user/clear-demo`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${session.access_token}` },
-      })
-      if (!res.ok) throw new Error('Failed to clear demo data')
-      window.location.reload()
-    } catch (err) {
-      setError(err.message)
-      setLoading(false)
-    }
-  }
-
-  const handleDownloadCard = async () => {
-    if (cardRef.current) {
-      try {
-        const canvas = await html2canvas(cardRef.current, { backgroundColor: '#ffffff', scale: 2 })
-        const link = document.createElement('a')
-        link.download = 'firstmerge-pr-celebration.png'
-        link.href = canvas.toDataURL('image/png')
-        link.click()
-      } catch (err) {
-        console.error('Download failed', err)
-      }
-    }
-  }
-
-  const heatmapData = useMemo(() => {
-    if (!dashData?.issues) return { grid: [], monthLabels: [] }
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const counts = {};
-    dashData.issues.forEach(issue => {
-      if (issue.status === 'done' && issue.created_at) {
-        const d = new Date(issue.created_at);
-        d.setHours(0, 0, 0, 0);
-        counts[d.toISOString()] = (counts[d.toISOString()] || 0) + 1;
-      }
-    });
-
-    const grid = Array.from({ length: 7 }, () => new Array(26).fill(0));
-    const startDate = new Date(today);
-    startDate.setDate(today.getDate() - (26 * 7) + 1);
-
-    const monthLabels = [];
-    let currentMonth = -1;
-
-    for (let w = 0; w < 26; w++) {
-      for (let d = 0; d < 7; d++) {
-        const cellDate = new Date(startDate);
-        cellDate.setDate(startDate.getDate() + (w * 7) + d);
-        if (cellDate > today) break;
-
-        const m = cellDate.getMonth();
-        if (d === 0 && m !== currentMonth) {
-          monthLabels.push({ weekIndex: w, label: cellDate.toLocaleString('default', { month: 'short' }) });
-          currentMonth = m;
-        }
-
-        cellDate.setHours(0, 0, 0, 0);
-        grid[d][w] = counts[cellDate.toISOString()] || 0;
-      }
-    }
-
-    return { grid, monthLabels };
-  }, [dashData])
-
-  const chartData = dashData
-    ? [
-      { name: 'Saved', count: dashData.issues.filter((i) => i.status === 'saved').length, color: 'var(--text-secondary)' },
-      { name: 'Attempting', count: dashData.issues.filter((i) => i.status === 'attempting').length, color: 'var(--accent-blue)' },
-      { name: 'Done', count: dashData.issues.filter((i) => i.status === 'done').length, color: 'var(--green)' },
-    ]
-    : []
-
-  const maxStreak = dashData?.currentStreak || 0
-  const demoRepos = ['facebook/react', 'tailwindlabs/tailwindcss', 'vitejs/vite', 'supabase/supabase', 'vercel/next.js']
-  const isDemoSeeded = dashData?.issues.some(i => demoRepos.includes(i.repo_name))
+    loadData()
+  }, [user?.id])
 
   if (!user) {
     return (
-      <div className="bg-[var(--canvas)] min-h-screen text-[var(--text)]">
-        <Navbar user={user} signIn={signIn} signOut={signOut} />
-        <div className="flex flex-col items-center justify-center min-h-[70vh] px-6">
-          <div className="bg-[var(--surface)] border border-[rgba(255,255,255,0.08)] rounded-2xl p-10 text-center max-w-md">
-            <h2 className="text-lg font-semibold text-[var(--text)] mb-2">
-              Sign in to view your Dashboard
-            </h2>
-            <button onClick={signIn} className="inline-flex items-center gap-2 text-white font-medium rounded-md px-5 py-2.5 text-sm transition-colors duration-150 mt-4" style={{ backgroundColor: 'var(--accent-blue)' }}>
-              Continue with GitHub
-            </button>
-          </div>
+      <div className="bg-[var(--color-dashboard-bg)] min-h-screen text-[var(--color-dashboard-text)]">
+        <div className="bg-[var(--color-dashboard-nav)]"><Navbar user={user} signIn={signIn} signOut={signOut} /></div>
+        <div className="flex justify-center py-20">
+          <button onClick={signIn} className="px-4 py-2 bg-black text-white rounded-md">Log in with GitHub</button>
         </div>
       </div>
     )
   }
 
+  if (loading) return (
+    <div className="bg-[var(--color-dashboard-bg)] min-h-screen">
+      <div className="bg-[var(--color-dashboard-nav)]">
+        <Navbar user={user} signIn={signIn} signOut={signOut} />
+      </div>
+      <DashboardSkeleton />
+    </div>
+  )
+
+  const profile = githubData?.profile || {}
+  const activity = githubData?.activity || {}
+
+  const totalCommits = activity.contributionSplit?.find(i => i.name === 'Commits')?.value || 0;
+  const totalOS = (activity.totalPRs || 0) + (activity.totalIssuesClosed || dashData?.totalDone || 0);
+
+  const milestones = [
+    { name: 'The Spark', desc: '10 Commits', image: '/medals/commit_bronze.png', achieved: true, progress: `10/10` },
+    { name: 'Consistent', desc: '100 Commits', image: '/medals/commit_silver.png', achieved: true, progress: `100/100` },
+    { name: 'Machine', desc: '500 Commits', image: '/medals/commit_gold.png', achieved: true, progress: `500/500` },
+    { name: 'First Issue', desc: '1 OS PR/Issue', image: '/medals/os_bronze.png', achieved: true, progress: `1/1` },
+    { name: 'Helper', desc: '10 OS PR/Issues', image: '/medals/os_silver.png', achieved: true, progress: `10/10` },
+    { name: 'Legend', desc: '50 OS PR/Issues', image: '/medals/os_gold.png', achieved: true, progress: `50/50` },
+  ];
+
   return (
-    <div className="bg-[var(--canvas)] min-h-screen text-[var(--text)] pb-20">
-      <Navbar user={user} signIn={signIn} signOut={signOut} />
-
-      <div className="w-full mx-auto px-4 md:px-8 lg:px-12 xl:px-16 py-12">
-
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-10">
-          <div>
-            <h1 className="text-[40px] font-display font-extrabold tracking-tight mb-2 text-[var(--text)]">
-              Dashboard
-            </h1>
-            <p className="font-mono text-[var(--text-secondary)] text-[13px] uppercase tracking-wider">
-              Track your contribution consistency and recent merges.
-            </p>
-          </div>
-        </div>
-
-        {loading && <Spinner />}
-
-        {error && (
-          <div className="bg-[color-mix(in_srgb,var(--red)_10%,transparent)] border border-[var(--red)] rounded-lg p-4 mb-6">
-            <p className="text-sm" style={{ color: 'var(--red)' }}>{error}</p>
-          </div>
-        )}
-
-        {dashData && !loading && (
-          <div className="flex flex-col gap-3">
-
-            {/* ── ROW 1 ── */}
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
-              
-              {/* Large card (7fr): Merge Rate */}
-              <div className="group md:col-span-7 bg-[var(--surface)] border border-[var(--border)] rounded-xl p-6 relative overflow-hidden flex flex-col items-center justify-center min-h-[180px] cursor-default shadow-sm hover:border-[var(--border-hover)] transition-colors">
-                {/* Background Track Arc */}
-                <svg className="absolute inset-0 w-full h-full opacity-10" viewBox="0 0 200 100" preserveAspectRatio="xMidYMid meet">
-                  <path d="M 30 90 A 70 70 0 0 1 170 90" fill="none" stroke="currentColor" strokeWidth="6" strokeLinecap="round" />
-                </svg>
-                {/* Active Progress Arc */}
-                <svg className="absolute inset-0 w-full h-full opacity-80 group-hover:opacity-30 transition-opacity duration-300" viewBox="0 0 200 100" preserveAspectRatio="xMidYMid meet">
-                  <path d="M 30 90 A 70 70 0 0 1 170 90" fill="none" stroke="var(--teal)" strokeWidth="6" strokeLinecap="round" strokeDasharray="220" strokeDashoffset={animatedMergeRateOffset} style={{ transition: 'stroke-dashoffset 800ms ease-out' }} />
-                </svg>
-                
-                {/* Text overlay (hidden until hover) */}
-                <div className="relative z-10 text-center flex flex-col items-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 mt-8">
-                  <div className="text-[56px] font-display font-extrabold text-[var(--text)] leading-none mb-2 tracking-tighter">
-                    {dashData.mergeRate}%
-                  </div>
-                  <h2 className="font-mono text-[11px] text-[var(--teal)] font-bold uppercase tracking-widest">of your PRs get merged</h2>
-                </div>
-              </div>
-
-              {/* Tall card (5fr): Current Streak */}
-              <div className="md:col-span-5 bg-[color-mix(in_srgb,var(--teal)_5%,transparent)] border border-[color-mix(in_srgb,var(--teal)_20%,transparent)] rounded-xl p-6 shadow-sm relative overflow-hidden flex flex-col items-center justify-center min-h-[180px]">
-                <div className="text-[56px] font-display font-extrabold text-[var(--text)] leading-none mb-2 tracking-tighter">
-                  {dashData.currentStreak}
-                </div>
-                <p className="font-mono text-[11px] font-bold text-[var(--teal)] uppercase tracking-widest mb-4">day streak</p>
-                <div className="flex items-center justify-center w-12 h-12 rounded-full border border-[color-mix(in_srgb,var(--teal)_30%,transparent)]" style={{ backgroundColor: 'color-mix(in srgb, var(--teal) 10%, transparent)', color: 'var(--teal)' }}>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
-                </div>
-              </div>
-
-            </div>
-
-            {/* ── ROW 2 ── */}
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
-              
-              {/* Narrow card (5fr): Consistency Badges */}
-              <div className="md:col-span-5 bg-[var(--surface)] border border-[var(--border)] rounded-xl p-6 shadow-sm min-h-[200px] flex flex-col">
-                <h2 className="font-mono text-[13px] font-bold uppercase tracking-wider text-[var(--text)] mb-6">MILESTONES</h2>
-                <div className="flex-1 flex flex-col justify-between">
-                  {[
-                    { label: '7-day bronze', icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#CD7F32" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="14" r="6"/><path d="M9.1 10.9 6 5h12l-3.1 5.9"/></svg>, req: 7 },
-                    { label: '21-day silver', icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="14" r="6"/><path d="M9.1 10.9 6 5h12l-3.1 5.9"/></svg>, req: 21 },
-                    { label: '50-day gold', icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#eab308" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="14" r="6"/><path d="M9.1 10.9 6 5h12l-3.1 5.9"/></svg>, req: 50 },
-                    { label: '100-day diamond', icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 3h12l4 6-10 13L2 9Z"/><path d="M11 3 8 9l4 13"/><path d="M13 3l3 6-4 13"/></svg>, req: 100 },
-                  ].map(badge => {
-                    const unlocked = maxStreak >= badge.req;
-                    return (
-                      <div key={badge.req} className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <span className={`flex items-center justify-center ${!unlocked ? 'grayscale opacity-30' : ''}`}>{badge.icon}</span>
-                          <span className={`font-mono text-[12px] font-semibold uppercase tracking-wider ${unlocked ? 'text-[var(--text)]' : 'text-[var(--text-muted)]'}`}>{badge.label}</span>
-                        </div>
-                        {unlocked ? (
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--teal)]"><path d="M20 6 9 17l-5-5"/></svg>
-                        ) : (
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[rgba(255,255,255,0.1)]"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                        )}
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-
-              {/* Wide card (7fr): Heatmap */}
-              <div className="md:col-span-7 bg-[var(--surface)] border border-[var(--border)] rounded-xl p-6 shadow-sm min-h-[200px] flex flex-col">
-                <h2 className="font-mono text-[13px] font-bold uppercase tracking-wider text-[var(--text)] mb-6">CONTRIBUTION ACTIVITY</h2>
-                <div className="flex-1 flex items-start justify-start overflow-hidden pt-2">
-                  <div className="flex flex-col gap-[4px] w-full">
-                    <div className="flex gap-[4px] mb-1.5 h-[16px] w-full">
-                      {Array.from({ length: 26 }).map((_, i) => {
-                        const label = heatmapData.monthLabels.find(m => m.weekIndex === i);
-                        return (
-                          <div key={i} className="flex-1 text-[10px] text-[var(--text-muted)] relative font-mono uppercase tracking-wider">
-                            {label ? <span className="absolute bottom-0 left-0 whitespace-nowrap">{label.label}</span> : ''}
-                          </div>
-                        )
-                      })}
-                    </div>
-                    {heatmapData.grid.map((row, rIndex) => (
-                      <div key={rIndex} className="flex gap-[4px] w-full">
-                        {row.map((count, cIndex) => {
-                          let style = { backgroundColor: 'rgba(255,255,255,0.05)' };
-                          if (count === 1) style = { backgroundColor: 'color-mix(in srgb, var(--teal) 30%, transparent)' };
-                          if (count >= 2) style = { backgroundColor: 'color-mix(in srgb, var(--teal) 70%, transparent)' };
-                          return <div key={cIndex} className="flex-1 aspect-square rounded-[2px] transition-colors hover:scale-110" style={style} />
-                        })}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-            </div>
-
-            {/* ── ROW 3 ── */}
-            <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-6 shadow-sm">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="font-mono text-[13px] font-bold uppercase tracking-wider text-[var(--text)]">SAVED ISSUES</h2>
-                {!isDemoSeeded && (
-                  <button onClick={handleSeedDemo} className="font-mono text-[11px] font-bold text-[var(--text-muted)] hover:text-[var(--text)] uppercase tracking-wider transition-colors bg-white/[0.05] border border-[rgba(255,255,255,0.05)] px-3 py-1.5 rounded-sm">
-                    Seed Demo Data
-                  </button>
-                )}
-              </div>
-              <div className="flex flex-col gap-3">
-                {dashData.issues.length === 0 && (
-                   <p className="font-mono text-[12px] text-[var(--text-muted)] py-4">No saved issues yet.</p>
-                )}
-                {dashData.issues.map(issue => (
-                  <div key={issue.id} className="flex items-center justify-between p-4 rounded-xl border border-[var(--border)] bg-[var(--canvas)] shadow-sm hover:border-[var(--border-hover)] transition-colors">
-                    <div className="flex-1 min-w-0 pr-4">
-                      <p className="text-[15px] font-semibold text-[var(--text)] truncate">{issue.issue_title}</p>
-                      <p className="font-mono text-[12px] text-[var(--text-secondary)] truncate mt-1">{issue.repo_name}</p>
-                    </div>
-                    
-                    <div className="flex flex-shrink-0 items-center gap-1 bg-[var(--canvas)]/40 p-1 rounded-lg border border-[rgba(255,255,255,0.05)]">
-                      {['saved', 'attempting', 'done'].map(status => {
-                        const active = issue.status === status;
-                        return (
-                          <button 
-                            key={status}
-                            onClick={() => handleStatusChange(issue.id, status)}
-                            disabled={updatingId === issue.id}
-                            className={`px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-wider rounded-md transition-all ${
-                              active 
-                                ? 'bg-white/[0.08] text-[var(--text)] shadow-sm' 
-                                : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
-                            }`}
-                          >
-                            {status}
-                          </button>
-                        )
-                      })}
-                    </div>
-                    
-                    <a href={issue.issue_url} target="_blank" rel="noopener noreferrer" className="ml-5 mr-2 text-[var(--text-muted)] hover:text-[var(--teal)] transition-colors">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                    </a>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* ── ROW 4 ── */}
-            <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-6 shadow-sm h-[200px] flex flex-col">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={chartData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-                  <XAxis dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 11, fontFamily: 'JetBrains Mono, monospace', textTransform: 'uppercase' }} axisLine={false} tickLine={false} />
-                  <YAxis allowDecimals={false} tick={{ fill: 'var(--text-secondary)', fontSize: 11, fontFamily: 'JetBrains Mono, monospace' }} axisLine={false} tickLine={false} />
-                  <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.05)' }} />
-                  <Bar dataKey="count" radius={[2, 2, 0, 0]} maxBarSize={40}>
-                    {chartData.map((entry, idx) => (
-                      <Cell key={idx} fill={entry.name === 'Done' ? 'var(--teal)' : entry.color} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-
-            {/* Clear Demo link in bottom right */}
-            {isDemoSeeded && (
-              <div className="flex justify-end mt-2">
-                <button onClick={handleClearDemo} className="text-[12px] text-[var(--text-muted)] hover:text-[var(--red)] transition-colors underline decoration-dotted underline-offset-4">
-                  Clear Demo Data
-                </button>
-              </div>
-            )}
-
-          </div>
-        )}
+    <div className="bg-[var(--color-dashboard-bg)] min-h-screen text-[var(--color-dashboard-text)] font-sans">
+      <div className="bg-[var(--color-dashboard-nav)]">
+        <Navbar user={user} signIn={signIn} signOut={signOut} />
       </div>
 
-      {/* Share Modal ... */}
-      {showShareModal && justMergedIssue && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--canvas)]/80 p-4">
-          <div className="bg-[var(--canvas)] border border-[var(--border)] rounded-xl p-6 shadow-lg max-w-sm w-full">
-            <div
-              ref={cardRef}
-              className="p-8 rounded-lg bg-[var(--surface)] border border-[var(--border)] text-center mb-6 flex flex-col items-center"
-            >
-              <div className="w-12 h-12 rounded-full flex items-center justify-center mb-4" style={{ backgroundColor: 'color-mix(in srgb, var(--green) 15%, transparent)', color: 'var(--green)' }}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M20 6 9 17l-5-5" />
-                </svg>
-              </div>
-              <h2 className="text-xl font-bold text-[var(--text)] mb-1">
-                FirstMerge
+      {error && <div className="p-4 text-red-600 text-center">{error}</div>}
+
+      <div className="max-w-[2880px] mx-auto px-8 py-8 flex flex-col md:flex-row gap-8">
+        
+        {/* Left Sidebar */}
+        <div className="w-full md:w-[300px] flex-shrink-0 flex flex-col gap-8">
+          
+          {/* User Info */}
+          <div className="flex items-center gap-4">
+            {profile.avatar_url ? (
+              <img src={profile.avatar_url} alt="avatar" className="w-20 h-20 bg-gray-200 rounded-2xl object-cover" />
+            ) : (
+              <div className="w-20 h-20 bg-gray-300 rounded-2xl flex items-center justify-center text-sm text-gray-500">user icon</div>
+            )}
+            <div>
+              <h2 className="text-xl font-bold uppercase">
+                {profile.name || user?.user_metadata?.full_name || user?.user_metadata?.name || 'GITHUB NAME'}
               </h2>
-              <p className="text-sm text-[var(--text-secondary)] mb-6">
-                @{user?.user_metadata?.user_name || 'developer'}
+              <p className="text-sm text-[var(--color-dashboard-muted)] mt-1">
+                {profile.login || user?.user_metadata?.user_name || user?.user_metadata?.preferred_username || 'github username'}
               </p>
-              <div className="bg-[var(--canvas)] border border-[var(--border)] rounded-md px-4 py-3 w-full mb-4 text-center">
-                <p className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-1">Merged</p>
-                <p className="text-[var(--text)] font-medium text-sm truncate">
-                  {justMergedIssue.repo_name}
-                </p>
-              </div>
-              <p className="flex items-center gap-2 font-semibold text-[15px]" style={{ color: 'var(--green)' }}>
-                Just got my PR merged!
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5.8 11.3 2 22l10.7-3.79"/><path d="M4 3h.01"/><path d="M22 8h.01"/><path d="M15 2h.01"/><path d="M22 20h.01"/><path d="m22 2-2.24.75a2.9 2.9 0 0 0-1.96 3.12v0c.1.86-.57 1.63-1.45 1.63h-.38c-.86 0-1.6.6-1.76 1.44L14 10"/><path d="m22 13-.82-.33c-.86-.34-1.82.2-1.98 1.11v0c-.11.7-.72 1.22-1.43 1.22H17"/><path d="m11 2 .33.82c.34.86-.2 1.82-1.11 1.98v0C9.52 4.9 9 5.52 9 6.23V7"/><path d="M11 13c1.93 1.93 2.83 4.17 2 5-.83.83-3.07-.07-5-2-1.93-1.93-2.83-4.17-2-5 .83-.83 3.07.07 5 2Z"/></svg>
-              </p>
-            </div>
-            <div className="flex gap-2">
-              <button onClick={handleDownloadCard} className="flex-1 py-2 text-white rounded-md font-medium text-[13px] transition-colors" style={{ backgroundColor: 'var(--green)' }}>
-                Save Image
-              </button>
-              <button onClick={() => setShowShareModal(false)} className="px-4 py-2 bg-[var(--surface)] text-[var(--text)] border border-[var(--border)] rounded-md text-[13px] font-medium hover:bg-[var(--surface-elevated)] transition-colors">
-                Close
-              </button>
             </div>
           </div>
+
+          <div>
+            <h3 className="text-lg font-bold text-[var(--color-dashboard-muted)]">Milestones Rewards:</h3>
+            <div className="border border-gray-200 rounded-md mt-2 p-5 grid grid-cols-3 gap-y-6 gap-x-2" style={{ backgroundColor: '#fffbf4' }}>
+              {milestones.map((m, idx) => (
+                <div key={idx} className="h-16 flex flex-col items-center justify-center group relative cursor-help">
+                  <div className={`${idx === 0 ? 'w-16 h-16' : 'w-14 h-14'} rounded-full flex items-center justify-center ${m.achieved ? 'bg-[#fffbf4] shadow-sm ring-1 ring-gray-200' : 'bg-gray-100'} transition-all duration-300 group-hover:scale-110`}>
+                    <img 
+                      src={m.image} 
+                      alt={m.name} 
+                      className={`${idx === 0 ? 'w-16 h-16 scale-110' : 'w-11 h-11'} object-contain transition-all duration-300 ${m.achieved ? 'drop-shadow-md' : 'grayscale opacity-40 blur-[0.5px]'}`} 
+                    />
+                  </div>
+                  
+                  {/* Tooltip */}
+                  <div className="absolute top-full mt-3 w-32 bg-gray-900 text-white text-xs p-2.5 rounded shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10 text-center pointer-events-none">
+                    <p className="font-bold mb-1">{m.name}</p>
+                    <p className="text-gray-300 mb-2 text-[10px]">{m.desc}</p>
+                    <div className="w-full bg-gray-700 h-1.5 rounded-full overflow-hidden">
+                      <div className="bg-[#e3b341] h-full transition-all duration-1000" style={{ width: `${(parseInt(m.progress.split('/')[0]) / parseInt(m.progress.split('/')[1])) * 100}%` }}></div>
+                    </div>
+                    <p className="mt-1 text-[10px] text-gray-300">{m.progress}</p>
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 border-[6px] border-transparent border-b-gray-900"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="border-t border-gray-200 pt-6">
+            <h3 className="text-lg font-bold text-[var(--color-dashboard-muted)] mb-4">Community Stats</h3>
+            <div className="space-y-4">
+              <p className="flex justify-between text-sm">
+                <span>Total issues Closed :</span>
+                <span className="font-semibold">{activity.totalIssuesClosed || dashData?.totalDone || 0}</span>
+              </p>
+              <p className="flex justify-between text-sm">
+                <span>Total PR's Opened:</span>
+                <span className="font-semibold">{activity.totalPRs || 0}</span>
+              </p>
+
+            </div>
+          </div>
+
+          <div className="border-t border-gray-200 pt-6">
+            <h3 className="text-lg font-bold text-[var(--color-dashboard-muted)] mb-4">Languages</h3>
+            <div className="space-y-3">
+              {(activity.languages || []).slice(0, 3).map((lang, idx) => (
+                <div key={idx} className="flex justify-between items-center">
+                  <span className="px-3 py-1 bg-gray-200 rounded-full text-xs font-medium">{lang.lang}</span>
+                  <span className="text-xs text-[var(--color-dashboard-muted)]">{lang.percentage}%</span>
+                </div>
+              ))}
+              {(!activity.languages || activity.languages.length === 0) && (
+                <p className="text-sm text-gray-400">No language data</p>
+              )}
+            </div>
+          </div>
+
+          <div className="border-t border-gray-200 pt-6">
+            <h3 className="text-lg font-bold text-[var(--color-dashboard-muted)] mb-4">Type of Issue solved</h3>
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <span className="px-3 py-1 bg-gray-200 rounded-full text-xs font-medium">Good First issue</span>
+                <span className="text-xs text-[var(--color-dashboard-muted)]">x{dashData?.totalDone || 0}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="px-3 py-1 bg-gray-200 rounded-full text-xs font-medium">Ui Fixes</span>
+                <span className="text-xs text-[var(--color-dashboard-muted)]">x0</span>
+              </div>
+            </div>
+          </div>
+
         </div>
-      )}
+
+        {/* Main Content */}
+        <div className="flex-1 flex flex-col gap-6">
+          
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* User Stats Box (now Contribution Split) */}
+            <div className="border border-gray-200 rounded-xl p-6 min-h-[200px] flex flex-col" style={{ backgroundColor: '#fffbf4' }}>
+              <h3 className="text-xl font-bold text-[var(--color-dashboard-muted)] mb-2">Contribution Split</h3>
+              <div className="flex flex-row items-center flex-1 w-full">
+                {/* Chart Container (Left) */}
+                <div className="flex-1 h-full flex items-center justify-start">
+                  {activity.contributionSplit && activity.contributionSplit.length > 0 ? (
+                    <ResponsiveContainer width="100%" height={180}>
+                      <PieChart>
+                        <Pie
+                          data={activity.contributionSplit}
+                          cx="35%"
+                          cy="50%"
+                          innerRadius={55}
+                          outerRadius={80}
+                          paddingAngle={3}
+                          dataKey="value"
+                          stroke="none"
+                        >
+                          {activity.contributionSplit.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <Tooltip 
+                          contentStyle={{ backgroundColor: '#fff', borderRadius: '8px', border: '1px solid #e0e0e0', fontSize: '12px', padding: '4px 8px' }}
+                          itemStyle={{ color: '#000', fontWeight: '500' }}
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="flex items-center justify-center h-full text-gray-400 text-sm">No recent contributions</div>
+                  )}
+                </div>
+
+                {/* Legend Container (Right) */}
+                <div className="flex flex-col justify-center gap-4 w-[130px] pl-4">
+                  {(activity.contributionSplit || []).map((entry, idx) => (
+                    <div key={idx} className="flex items-center gap-3 text-sm font-medium text-[var(--color-dashboard-muted)]">
+                      <div className="w-4 h-4 rounded-full" style={{ backgroundColor: entry.color }}></div>
+                      {entry.name}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Top Contribution */}
+            <div className="border border-gray-200 rounded-xl p-6 min-h-[200px]" style={{ backgroundColor: '#fffbf4' }}>
+              <h3 className="text-xl font-bold text-[var(--color-dashboard-muted)] mb-4">Your Top contribution</h3>
+              <div className="space-y-3">
+                {activity.topRepos && activity.topRepos.length > 0 ? (
+                  activity.topRepos.map((repo, idx) => (
+                    <div key={idx} className="flex justify-between items-center p-3 rounded-md border border-gray-100" style={{ backgroundColor: '#fff' }}>
+                      <div className="flex-1 min-w-0 pr-4">
+                        <a href={repo.url} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold hover:underline truncate block text-black">
+                          {repo.name}
+                        </a>
+                        <p className="text-xs text-[var(--color-dashboard-muted)] truncate mt-0.5">{repo.description || 'No description'}</p>
+                      </div>
+                      <div className="flex items-center gap-1 text-xs font-medium text-[var(--color-dashboard-muted)]">
+                        <span className="text-[#e3b341]">★</span>
+                        <span>{repo.stars}</span>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <>
+                    <div className="h-8 bg-gray-200 rounded-sm w-full"></div>
+                    <div className="h-8 bg-gray-200 rounded-sm w-[90%]"></div>
+                    <div className="h-8 bg-gray-200 rounded-sm w-[95%]"></div>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Heatmap */}
+          <div className="border border-gray-200 rounded-xl pt-6 pb-6 px-4 md:px-8 flex flex-col" style={{ backgroundColor: '#fffbf4' }}>
+            <Heatmap 
+              data={activity.heatmap || []} 
+              totalIssues={activity.totalIssuesClosed || dashData?.totalDone || 0}
+              activeDays={activity.heatmap?.filter(d => d.count > 0)?.length || 0}
+
+            />
+          </div>
+
+          {/* Bottom Tabs */}
+          <div className="border border-gray-200 rounded-xl p-6" style={{ backgroundColor: '#fffbf4' }}>
+            <div className="flex gap-8 border-b border-gray-200 pb-4 mb-4">
+              {['Saved', 'Open PR', 'Closed PRs'].map(tab => (
+                <button 
+                  key={tab}
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setActiveTab(tab);
+                  }}
+                  className={`flex items-center gap-2 text-sm font-medium ${activeTab === tab ? 'text-black' : 'text-[var(--color-dashboard-muted)]'}`}
+                >
+                  {tab === 'Open PR' && <span className="text-lg">⑂</span>}
+                  {tab === 'Closed PRs' && <span className="text-lg opacity-60">⑂</span>}
+                  {tab}
+                </button>
+              ))}
+            </div>
+            
+            <div className="space-y-3">
+              {(dashData?.issues || []).map((issue, idx) => (
+                <div key={idx} className="flex justify-between items-center p-4 rounded-md border border-gray-100" style={{ backgroundColor: '#fff' }}>
+                  <span className="text-sm font-medium uppercase">{issue.repo_name} - {issue.issue_title}</span>
+                  <a href={issue.issue_url} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-black">
+                    ↗
+                  </a>
+                </div>
+              ))}
+              {dashData?.issues?.length === 0 && (
+                <p className="text-sm text-gray-500 py-4 text-center">No repos to show.</p>
+              )}
+            </div>
+          </div>
+
+        </div>
+      </div>
     </div>
   )
 }

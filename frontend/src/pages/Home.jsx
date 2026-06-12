@@ -76,24 +76,58 @@ const Heatmap = () => {
     return 0 // border
   }
 
+  const months = ['Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May']
+
   return (
-    <div className="flex flex-col gap-[3px] w-full">
-      {Array.from({ length: rows }).map((_, r) => (
-        <div key={r} className="flex gap-[3px] w-full">
-          {Array.from({ length: cols }).map((_, c) => {
-            const opacity = getCellOpacity(c, r)
-            return (
-              <div 
-                key={c} 
-                className="flex-1 aspect-square rounded-[2px]" 
-                style={{ 
-                  backgroundColor: opacity > 0 ? `color-mix(in srgb, var(--landing-green) ${opacity * 100}%, transparent)` : 'var(--landing-border)' 
-                }} 
-              />
-            )
-          })}
+    <div className="w-full flex flex-col gap-4">
+      {/* Top Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between text-[13px] text-[var(--landing-text-secondary)]">
+        <div className="flex items-center gap-2">
+          <span><span className="font-bold text-[var(--landing-text)]">100</span> submissions in the past one year</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="opacity-50">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 16v-4" />
+            <path d="M12 8h.01" />
+          </svg>
         </div>
-      ))}
+        <div className="flex items-center gap-4 mt-2 md:mt-0">
+          <div>Total active days: <span className="font-bold text-[var(--landing-text)]">36</span></div>
+          <div>Max streak: <span className="font-bold text-[var(--landing-text)]">10</span></div>
+          <div className="bg-[var(--landing-surface)] px-3 py-1 rounded-md border border-[var(--landing-border)] flex items-center gap-2 text-[var(--landing-text)] ml-2 cursor-pointer">
+            Current
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M6 9l6 6 6-6"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      {/* Grid */}
+      <div className="flex flex-col gap-[3px] w-full">
+        {Array.from({ length: rows }).map((_, r) => (
+          <div key={r} className="flex gap-[3px] w-full">
+            {Array.from({ length: cols }).map((_, c) => {
+              const opacity = getCellOpacity(c, r)
+              return (
+                <div 
+                  key={c} 
+                  className="flex-1 aspect-square rounded-[2px]" 
+                  style={{ 
+                    backgroundColor: opacity > 0 ? `color-mix(in srgb, var(--landing-green) ${opacity * 100}%, transparent)` : 'var(--landing-border)' 
+                  }} 
+                />
+              )
+            })}
+          </div>
+        ))}
+      </div>
+
+      {/* Months */}
+      <div className="flex justify-between text-[12px] text-[var(--landing-text-secondary)] px-1">
+        {months.map((m, i) => (
+          <div key={i}>{m}</div>
+        ))}
+      </div>
     </div>
   )
 }
@@ -249,23 +283,23 @@ export default function Home({ user, signIn, signOut }) {
             </FadeIn>
             
             <FadeIn delay={200}>
-              <div className="bg-[var(--landing-canvas)] border border-[var(--landing-border)] rounded-xl p-8 w-full mb-12 shadow-none overflow-x-auto">
+              <div className="bg-[var(--landing-canvas)] border border-[var(--landing-border)] rounded-xl p-8 max-w-[950px] mx-auto mb-6 shadow-none overflow-x-auto">
                 <Heatmap />
               </div>
             </FadeIn>
 
             <FadeIn delay={300}>
-              <div className="flex flex-wrap gap-8 items-center">
+              <div className="flex flex-wrap gap-8 items-center max-w-[950px] mx-auto px-8">
                 <div className="flex flex-col items-center gap-3">
-                  <div className="w-16 h-16 rounded-full border-2 border-[var(--landing-green)] flex items-center justify-center text-2xl bg-[color-mix(in_srgb,var(--landing-green)_10%,transparent)]">🥉</div>
+                  <div className="w-10 h-10 rounded-full border-2 border-[var(--landing-green)] flex items-center justify-center text-base bg-[color-mix(in_srgb,var(--landing-green)_10%,transparent)]">🥉</div>
                   <div className="font-mono text-[12px] font-bold text-[var(--landing-text)] tracking-wider">7-DAY STREAK</div>
                 </div>
                 <div className="flex flex-col items-center gap-3 opacity-50">
-                  <div className="w-16 h-16 rounded-full border-2 border-[var(--landing-border)] flex items-center justify-center text-2xl grayscale">🥈</div>
+                  <div className="w-10 h-10 rounded-full border-2 border-[var(--landing-border)] flex items-center justify-center text-base grayscale">🥈</div>
                   <div className="font-mono text-[12px] font-bold text-[var(--landing-text-secondary)] tracking-wider">21-DAY STREAK</div>
                 </div>
                 <div className="flex flex-col items-center gap-3 opacity-50">
-                  <div className="w-16 h-16 rounded-full border-2 border-[var(--landing-border)] flex items-center justify-center text-2xl grayscale">🥇</div>
+                  <div className="w-10 h-10 rounded-full border-2 border-[var(--landing-border)] flex items-center justify-center text-base grayscale">🥇</div>
                   <div className="font-mono text-[12px] font-bold text-[var(--landing-text-secondary)] tracking-wider">50-DAY STREAK</div>
                 </div>
               </div>

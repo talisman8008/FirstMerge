@@ -68,15 +68,16 @@ export default function Navbar({ user, signIn, signOut }) {
     }
   }
 
+  const isDashboard = location.pathname === '/dashboard'
   const navClass = isLanding 
     ? `fixed top-0 left-0 w-full z-50 transition-transform duration-300 ${scrolled ? 'translate-y-0 bg-[var(--landing-canvas)] border-b border-[var(--landing-border)]' : '-translate-y-full bg-transparent border-transparent'}`
-    : `sticky top-0 z-50 transition-all duration-300 ${scrolled ? 'bg-[var(--canvas)]/90 backdrop-blur-sm border-b border-[var(--border)]' : 'bg-transparent border-transparent'}`
+    : `sticky top-0 z-50 transition-all duration-300 ${scrolled ? (isDashboard ? 'bg-[var(--color-dashboard-nav)]/90' : 'bg-[var(--canvas)]/90') + ' backdrop-blur-sm border-b border-[var(--border)]' : (isDashboard ? 'bg-[var(--color-dashboard-nav)] border-transparent' : 'bg-transparent border-transparent')}`
 
   const getNavLinkClass = ({ isActive }) => {
     if (isLanding) {
       return `text-[13px] transition-colors duration-150 px-2.5 py-1.5 rounded-md ${isActive ? 'font-bold text-[var(--landing-text)] bg-black/5' : 'font-medium text-[var(--landing-text-secondary)] hover:bg-black/5 hover:text-[var(--landing-text)]'}`
     }
-    return `text-[13px] transition-colors duration-150 px-2.5 py-1.5 rounded-md ${isActive ? 'font-bold text-[var(--teal)] bg-[var(--surface-elevated)]' : 'font-medium text-[var(--text-secondary)] hover:bg-[var(--surface-elevated)] hover:text-[var(--text)]'}`
+    return `text-[13px] transition-colors duration-150 px-2.5 py-1.5 rounded-md ${isActive ? 'font-bold bg-[#FFEED8] text-[#484848]' : 'font-medium text-[var(--text-secondary)] hover:bg-[var(--surface-elevated)] hover:text-[var(--text)]'}`
   }
 
   return (
