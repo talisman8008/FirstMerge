@@ -9,14 +9,16 @@ const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000'
  * Fetch enriched issues from the backend.
  * @param {string} language
  * @param {string} skillLevel
- * @param {number} page
+ * @param {string[]} labels
  */
-export async function fetchIssues(language, skillLevel, page) {
+export async function fetchIssues(language, skillLevel, page, labels = ['good-first-issue'], searchQuery = '') {
   try {
     const params = new URLSearchParams({
       language,
       skillLevel,
-      page: String(page)
+      page: String(page),
+      labels: labels.join(','),
+      searchQuery
     })
     
     const res = await fetch(`${BACKEND_URL}/api/issues?${params}`)
