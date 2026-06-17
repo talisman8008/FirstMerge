@@ -101,3 +101,37 @@ body {
 .btn-scale:active {
   transform: scale(0.97);
 }
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-hover);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-hover) transparent;
+}
+
+/* Disable visible caret for caret browsing on non-editable elements */
+* {
+  caret-color: transparent;
+}
+
+input, textarea, [contenteditable="true"], [contenteditable=""] {
+  caret-color: auto;
+}

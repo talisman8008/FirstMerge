@@ -45,7 +45,21 @@ export async function searchIssues(language, skillLevel, labels = ['good-first-i
       return `label:"${mapped}"`
     }).join(' ')
 
-    let q = `${labelClauses} language:${language} state:open is:public`
+    const frameworks = {
+      'react': 'React language:javascript',
+      'vue': 'Vue language:javascript',
+      'angular': 'Angular language:typescript',
+      'svelte': 'Svelte language:javascript',
+      'next.js': '"Next.js" language:typescript',
+      'nuxt.js': '"Nuxt.js" language:javascript',
+      'node.js': '"Node.js" language:javascript',
+      'ember': 'Ember language:javascript'
+    }
+
+    const langLower = language.toLowerCase()
+    const mappedLanguageQuery = frameworks[langLower] || `language:${language}`
+
+    let q = `${labelClauses} ${mappedLanguageQuery} state:open is:public`
     if (skillLevel?.toLowerCase() === 'beginner') q += ' -label:complexity:high'
     if (searchQuery) q += ` ${searchQuery}`
 

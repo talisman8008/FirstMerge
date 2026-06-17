@@ -1,4 +1,9 @@
-const LANGUAGES = ['JavaScript', 'TypeScript', 'Python', 'Java', 'C++', 'Go', 'Rust', 'Ruby']
+const LANGUAGES = [
+  'Angular', 'C', 'C#', 'C++', 'CSS', 'Dart', 'Elixir', 'Ember', 'Go', 'Haskell', 
+  'HTML', 'Java', 'JavaScript', 'Kotlin', 'Lua', 'Next.js', 'Node.js', 'Nuxt.js', 
+  'Objective-C', 'Perl', 'PHP', 'Python', 'R', 'React', 'Ruby', 'Rust', 'Scala', 
+  'Shell', 'Svelte', 'Swift', 'TypeScript', 'Vue'
+]
 const SKILL_LEVELS = ['Beginner', 'Intermediate', 'Advanced']
 const LABELS = [
   { id: 'good-first-issue', name: 'Good First Issue' },

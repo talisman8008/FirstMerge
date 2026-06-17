@@ -2,6 +2,10 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import Navbar from '../components/Navbar.jsx'
 import supabase from '../lib/supabase.js'
+import ScrollStack, { ScrollStackItem } from '../components/ScrollStack.jsx'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
+import rehypeRaw from 'rehype-raw'
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000'
 
@@ -168,8 +172,50 @@ export default function IssueDetail({ user, signIn, signOut }) {
                       {details.issue.title} <span className="font-mono text-[16px] font-normal text-[var(--text-muted)] ml-2">#{number}</span>
                     </h1>
                     <div className="relative">
-                      <div className={`text-[16px] text-[var(--text-muted)] leading-relaxed bg-[var(--bg-primary)]/20 border border-[rgba(255,255,255,0.05)] shadow-inner p-6 md:p-8 rounded-2xl overflow-hidden transition-all duration-300 ${isDescriptionExpanded ? '' : 'max-h-[300px]'}`} style={{ whiteSpace: 'pre-wrap' }}>
-                        {details.issue.body || 'No description provided.'}
+                      <div className={`text-[16px] text-[var(--text-muted)] leading-relaxed bg-[var(--bg-primary)]/20 border border-[rgba(255,255,255,0.05)] shadow-inner p-6 md:p-8 rounded-2xl overflow-hidden transition-all duration-300 ${isDescriptionExpanded ? '' : 'max-h-[300px]'}`}>
+                        {details.issue.body ? (
+                          <ReactMarkdown 
+                            remarkPlugins={[remarkGfm]}
+                            rehypePlugins={[rehypeRaw]}
+                            components={{
+                              h1: ({node, ...props}) => <h1 className="text-2xl font-bold text-[var(--text-primary)] mt-6 mb-4" {...props} />,
+                              h2: ({node, ...props}) => <h2 className="text-xl font-bold text-[var(--text-primary)] mt-5 mb-3" {...props} />,
+                              h3: ({node, ...props}) => <h3 className="text-lg font-bold text-[var(--text-primary)] mt-4 mb-2" {...props} />,
+                              h4: ({node, ...props}) => <h4 className="text-base font-bold text-[var(--text-primary)] mt-4 mb-2" {...props} />,
+                              p: ({node, ...props}) => <p className="mb-4 last:mb-0" {...props} />,
+                              ul: ({node, ...props}) => <ul className="list-disc list-outside ml-6 mb-4 space-y-1 marker:text-[var(--text-muted)]" {...props} />,
+                              ol: ({node, ...props}) => <ol className="list-decimal list-outside ml-6 mb-4 space-y-1 marker:text-[var(--text-muted)]" {...props} />,
+                              li: ({node, ...props}) => <li className="" {...props} />,
+                              a: ({node, ...props}) => <a className="text-[var(--accent-blue)] hover:underline" target="_blank" rel="noopener noreferrer" {...props} />,
+                              code: ({node, inline, className, children, ...props}) => {
+                                const match = /language-(\w+)/.exec(className || '')
+                                return !inline ? (
+                                  <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-lg overflow-hidden mb-4">
+                                    <div className="bg-[var(--bg-primary)] px-4 py-2 text-xs font-mono text-[var(--text-muted)] border-b border-[var(--border)]">
+                                      {match ? match[1] : 'code'}
+                                    </div>
+                                    <pre className="p-4 overflow-x-auto text-sm text-[var(--text-primary)] font-mono leading-relaxed" {...props}>
+                                      <code className={className}>{children}</code>
+                                    </pre>
+                                  </div>
+                                ) : (
+                                  <code className="bg-[var(--bg-card)] border border-[var(--border)] text-[var(--text-primary)] px-1.5 py-0.5 rounded text-[14px] font-mono" {...props}>
+                                    {children}
+                                  </code>
+                                )
+                              },
+                              blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-[var(--border)] pl-4 italic text-[var(--text-muted)] mb-4 bg-[rgba(255,255,255,0.02)] py-2 pr-4 rounded-r-lg" {...props} />,
+                              table: ({node, ...props}) => <div className="overflow-x-auto mb-4"><table className="w-full text-left border-collapse border border-[var(--border)]" {...props} /></div>,
+                              th: ({node, ...props}) => <th className="border border-[var(--border)] px-4 py-2 bg-[rgba(255,255,255,0.05)] font-semibold text-[var(--text-primary)]" {...props} />,
+                              td: ({node, ...props}) => <td className="border border-[var(--border)] px-4 py-2" {...props} />,
+                              img: ({node, ...props}) => <img className="max-w-full h-auto rounded-lg mb-4 border border-[rgba(255,255,255,0.1)]" {...props} alt={props.alt || 'Issue image'} />
+                            }}
+                          >
+                            {details.issue.body}
+                          </ReactMarkdown>
+                        ) : (
+                          'No description provided.'
+                        )}
                       </div>
                       
                       {!isDescriptionExpanded && details.issue.body && details.issue.body.length > 400 && (
@@ -219,73 +265,89 @@ export default function IssueDetail({ user, signIn, signOut }) {
                   <div className="space-y-6">
                     
                     {/* Bento Box Overview */}
-                    <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
                       
                       {/* What To Build (Span 8) */}
-                      <div className="md:col-span-8 bg-[var(--bg-card)] border border-[var(--border)] rounded-xl p-6 shadow-sm hover:border-[var(--border-hover)] transition-colors">
-                        <h3 className="font-mono text-[12px] font-bold text-[var(--accent-blue)] uppercase tracking-wider mb-4 flex items-center gap-2">
+                      <div className="md:col-span-8 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl p-8 shadow-sm hover:border-[var(--border-hover)] transition-colors">
+                        <h3 className="font-mono text-[12px] font-bold text-[var(--accent-blue)] uppercase tracking-wider mb-5 flex items-center gap-2">
                           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                           Objective
                         </h3>
-                        <p className="text-[17px] text-[var(--text-primary)] leading-relaxed">{roadmap.whatToBuild}</p>
+                        <p className="text-[15px] text-[var(--text-primary)] opacity-90 leading-[1.8] tracking-wide">{roadmap.whatToBuild}</p>
                       </div>
 
                       {/* Time & Difficulty (Span 4) */}
-                      <div className="md:col-span-4 bg-[var(--bg-card)] border border-[var(--border)] rounded-xl p-6 shadow-sm flex flex-col justify-center">
-                        <h3 className="font-mono text-[12px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-4">Estimates</h3>
-                        <div className="space-y-3">
-                          <div className="flex items-center justify-between bg-[var(--bg-primary)]/20 px-4 py-3 rounded-lg border border-[rgba(255,255,255,0.05)] shadow-inner">
-                            <span className="font-mono text-[13px] text-[var(--text-muted)] flex items-center gap-2 uppercase tracking-wider"><ClockIcon /> Time</span>
-                            <span className="font-mono text-[14px] font-semibold text-[var(--text-primary)]">{roadmap.estimatedTime || 'N/A'}</span>
+                      <div className="md:col-span-4 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl p-6 shadow-sm flex flex-col justify-center">
+                        <h3 className="font-mono text-[12px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-5">Estimates</h3>
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between gap-3 bg-[var(--bg-primary)] px-4 py-3 rounded-xl border border-[rgba(255,255,255,0.03)] shadow-inner">
+                            <span className="font-mono text-[11px] text-[var(--text-muted)] flex items-center gap-1.5 uppercase tracking-wider whitespace-nowrap"><ClockIcon /> Time</span>
+                            <span className="font-mono text-[13px] font-semibold text-[var(--text-primary)] text-right break-words">{roadmap.estimatedTime || 'N/A'}</span>
                           </div>
-                          <div className="flex items-center justify-between bg-[var(--bg-primary)]/20 px-4 py-3 rounded-lg border border-[rgba(255,255,255,0.05)] shadow-inner">
-                            <span className="font-mono text-[13px] text-[var(--text-muted)] flex items-center gap-2 uppercase tracking-wider">
-                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                          <div className="flex items-center justify-between gap-3 bg-[var(--bg-primary)] px-4 py-3 rounded-xl border border-[rgba(255,255,255,0.03)] shadow-inner">
+                            <span className="font-mono text-[11px] text-[var(--text-muted)] flex items-center gap-1.5 uppercase tracking-wider whitespace-nowrap">
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
                               Complexity
                             </span>
-                            <span className="font-mono text-[14px] font-semibold text-[var(--text-primary)]">{roadmap.difficulty || 'N/A'}</span>
+                            <span className="font-mono text-[13px] font-semibold text-[var(--text-primary)] text-right break-words">{roadmap.difficulty || 'N/A'}</span>
                           </div>
                         </div>
                       </div>
 
                       {/* Files to Touch (Span 6) */}
-                      <div className="md:col-span-6 bg-[var(--bg-card)] border border-[var(--border)] rounded-xl p-6 shadow-sm">
-                        <h3 className="font-mono text-[12px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-4">Files to Modify</h3>
-                        <div className="bg-[var(--bg-primary)]/20 border border-[rgba(255,255,255,0.05)] shadow-inner rounded-xl p-4 font-mono text-[14px] text-[var(--text-primary)] leading-relaxed break-all whitespace-pre-wrap">
-                          {roadmap.filesToTouch}
+                      <div className="md:col-span-6 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl p-8 shadow-sm">
+                        <h3 className="font-mono text-[12px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-5">Files to Modify</h3>
+                        <div className="flex flex-wrap gap-2">
+                          {(Array.isArray(roadmap.filesToTouch) ? roadmap.filesToTouch : (roadmap.filesToTouch || '').split(/[,\n\s]+/).filter(f => f.trim().length > 0)).map((file, i) => (
+                            <span key={i} className="px-3 py-1.5 bg-[var(--bg-primary)] border border-[rgba(255,255,255,0.05)] rounded-lg text-[12px] font-mono text-[var(--text-muted)] break-all hover:text-[var(--text-primary)] hover:border-[rgba(255,255,255,0.1)] transition-colors">
+                              {file}
+                            </span>
+                          ))}
+                          {(!roadmap.filesToTouch || roadmap.filesToTouch.length === 0) && (
+                            <span className="text-[13px] text-[var(--text-muted)] italic">No files specified</span>
+                          )}
                         </div>
                       </div>
 
                       {/* What to Avoid (Span 6) */}
-                      <div className="md:col-span-6 bg-[color-mix(in_srgb,var(--accent-red)_2%,transparent)] border border-[color-mix(in_srgb,var(--accent-red)_15%,transparent)] rounded-xl p-6 shadow-sm">
-                        <h3 className="font-mono text-[12px] font-bold text-[var(--accent-red)] uppercase tracking-wider mb-4 flex items-center gap-2">
+                      <div className="md:col-span-6 bg-[color-mix(in_srgb,var(--accent-red)_2%,transparent)] border border-[color-mix(in_srgb,var(--accent-red)_15%,transparent)] rounded-2xl p-8 shadow-sm">
+                        <h3 className="font-mono text-[12px] font-bold text-[var(--accent-red)] uppercase tracking-wider mb-5 flex items-center gap-2">
                           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
                           Constraints & Risks
                         </h3>
-                        <p className="text-[16px] text-[var(--text-primary)] leading-relaxed">{roadmap.whatToAvoid}</p>
+                        <p className="text-[14px] text-[var(--text-primary)] opacity-85 leading-[1.8]">{roadmap.whatToAvoid}</p>
                       </div>
 
                     </div>
 
                     {/* Step-by-Step Roadmap */}
                     {roadmap.roadmap && roadmap.roadmap.length > 0 && (
-                      <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-xl p-6 md:p-10 mt-6 shadow-sm">
+                      <div className="mt-12 mb-8">
                         <h3 className="font-sans text-[12px] tracking-[0.1em] text-[var(--accent-blue)] uppercase font-semibold mb-8">EXECUTION STEPS</h3>
-                        <div className="space-y-12 relative border-l border-[rgba(255,255,255,0.1)] ml-2">
-                          {roadmap.roadmap.map((step, idx) => (
-                            <div key={idx} className="relative flex items-start gap-8 pl-10 group">
-                              {/* Sharp minimalist line node */}
-                              <div className="absolute -left-[1px] top-3 w-[16px] h-[2px] bg-[var(--accent-blue)] group-hover:w-[24px] transition-all duration-300"></div>
-                              
-                              <div className="flex-1 min-w-0">
-                                <span className="font-mono inline-block text-[var(--accent-blue)] text-[12px] font-bold uppercase tracking-widest mb-2">
-                                  {step.step}
-                                </span>
-                                <h4 className="text-[20px] font-semibold text-[var(--text-primary)] mb-3">{step.title}</h4>
-                                <p className="text-[16px] text-[var(--text-muted)] leading-relaxed">{step.description}</p>
-                              </div>
-                            </div>
-                          ))}
+                        
+                        <div className="h-[600px] rounded-xl overflow-hidden bg-[var(--bg-card)] border border-[var(--border)] shadow-sm relative">
+                          <ScrollStack 
+                            useWindowScroll={false} 
+                            itemDistance={24} 
+                            itemStackDistance={50} 
+                            stackPosition="10%" 
+                            scaleEndPosition="5%"
+                            blurAmount={0}
+                            baseScale={0.9}
+                            itemScale={0.02}
+                          >
+                            {roadmap.roadmap.map((step, idx) => (
+                              <ScrollStackItem key={idx}>
+                                <div className="bg-[var(--bg-primary)] border border-[rgba(255,255,255,0.05)] rounded-xl p-5 md:p-6 h-full flex flex-col justify-center shadow-lg hover:border-[var(--accent-blue)] transition-colors duration-300">
+                                  <span className="font-mono inline-block text-[var(--accent-blue)] text-[12px] font-bold uppercase tracking-widest mb-3">
+                                    {step.step}
+                                  </span>
+                                  <h4 className="text-[22px] font-semibold text-[var(--text-primary)] mb-4 leading-tight">{step.title}</h4>
+                                  <p className="text-[15px] text-[var(--text-muted)] leading-relaxed">{step.description}</p>
+                                </div>
+                              </ScrollStackItem>
+                            ))}
+                          </ScrollStack>
                         </div>
                       </div>
                     )}

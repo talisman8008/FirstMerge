@@ -127,8 +127,9 @@ export default function IssueCard({ issue }) {
       </h3>
 
       {/* ROW 3 - bottom of card */}
-      <div className="flex justify-between items-end mt-2 pt-2">
-        <div className="flex items-center gap-3 flex-wrap">
+      <div className="flex justify-between items-end mt-auto pt-4">
+        {/* LEFT: Labels & Meta */}
+        <div className="flex flex-col gap-2">
           {interestingLabels.length > 0 && (
             <div className="flex items-center gap-2">
               {interestingLabels.map(lbl => (
@@ -140,7 +141,6 @@ export default function IssueCard({ issue }) {
           )}
           
           <div className="flex items-center gap-2 font-sans text-[12px] text-[var(--text-muted)]">
-            {interestingLabels.length > 0 && <span className="text-[var(--text-faint)]">·</span>}
             {stars !== undefined && (
               <span className="flex items-center gap-1 font-mono text-[12px]">
                 <span className="text-[12px]">★</span> {stars.toLocaleString()}
@@ -151,7 +151,8 @@ export default function IssueCard({ issue }) {
           </div>
         </div>
         
-        <div className="flex items-center gap-3">
+        {/* RIGHT: Actions */}
+        <div className="flex items-center gap-3 flex-shrink-0">
           <button 
             onClick={handleSaveIssue}
             disabled={savingStatus !== 'idle'}
@@ -164,7 +165,7 @@ export default function IssueCard({ issue }) {
              savingStatus === 'saving' ? '...' : 
              (savingStatus === 'saved' || savingStatus === 'already_saved') ? 'Saved' : 'Err'}
           </button>
-          <span className="font-sans text-[12px] text-[var(--text-muted)] hover:text-[var(--accent-green)] transition-colors">
+          <span className="font-sans text-[12px] text-[var(--text-muted)] hover:text-[var(--accent-green)] transition-colors whitespace-nowrap">
             View →
           </span>
         </div>
