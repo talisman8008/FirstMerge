@@ -234,7 +234,7 @@ export async function getCombinedRepoAndIssueData(owner, name, issueNumber) {
           pushedAt
           openIssuesTotal: issues(states: [OPEN]) { totalCount }
           pullRequests(states: [MERGED, CLOSED], first: $firstPRs, orderBy: { field: UPDATED_AT, direction: DESC }) {
-            nodes { mergedAt, createdAt, author { login }, number }
+            nodes { mergedAt, createdAt, author { login }, number, title, body }
           }
           issues(states: [CLOSED], first: $firstIssues, orderBy: { field: UPDATED_AT, direction: DESC }) {
             nodes { createdAt, closedAt, comments { totalCount } }
@@ -265,6 +265,10 @@ export async function getCombinedRepoAndIssueData(owner, name, issueNumber) {
     const openPRCount = (repo.openPullRequests?.nodes || []).filter(pr => 
       pattern.test(pr.title || '') || pattern.test(pr.body || '')
     ).length
+    
+    const mergedPRCount = (repo.pullRequests?.nodes || []).filter(pr => 
+      pr.mergedAt && (pattern.test(pr.title || '') || pattern.test(pr.body || ''))
+    ).length
 
     const repoStats = {
       stars: repo.stargazerCount,
@@ -272,7 +276,7 @@ export async function getCombinedRepoAndIssueData(owner, name, issueNumber) {
       openIssuesCount: repo.openIssuesTotal?.totalCount || 0
     }
 
-    return { closedPRs, closedIssues, openPRCount, repoStats }
+    return { closedPRs, closedIssues, openPRCount, mergedPRCount, repoStats }
   } catch (err) {
     console.error(`[github.getCombined] ${owner}/${name} failed:`, err.message)
     return null

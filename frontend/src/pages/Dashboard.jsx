@@ -104,6 +104,11 @@ const seedDashData = {
     { lang: 'CSS', percentage: 12 },
     { lang: 'HTML', percentage: 8 }
   ],
+  savedIssues: [
+    { repo_name: 'facebook/react', issue_title: 'Fix React component rendering bug', issue_url: 'https://github.com/facebook/react/issues/28000', status: 'saved' },
+    { repo_name: 'tailwindlabs/tailwindcss', issue_title: 'Add dark mode toggle', issue_url: 'https://github.com/tailwindlabs/tailwindcss/issues/1420', status: 'saved' },
+    { repo_name: 'vitejs/vite', issue_title: 'Migrate to Vite 5', issue_url: 'https://github.com/vitejs/vite/issues/15123', status: 'saved' }
+  ],
   openPRs: [
     { repo_name: 'microsoft/vscode', issue_title: 'Add new theme settings', issue_url: 'https://github.com/microsoft/vscode/pull/4' },
     { repo_name: 'facebook/react', issue_title: 'Update documentation for hooks', issue_url: 'https://github.com/facebook/react/pull/5' }
@@ -128,22 +133,8 @@ export default function Dashboard({ user, signIn, signOut }) {
 
   const toggleDemoMode = async () => {
     if (!isDemoMode) {
-      try {
-        const { data: { session } } = await supabase.auth.getSession()
-        const headers = { Authorization: `Bearer ${session.access_token}` }
-        const res = await fetch(`${BACKEND_URL}/api/user/seed-demo`, { method: 'POST', headers })
-        if (res.ok) {
-          const dashRes = await fetch(`${BACKEND_URL}/api/user/dashboard`, { headers })
-          if (dashRes.ok) {
-            const dData = await dashRes.json()
-            setDashData(dData)
-          }
-          setIsDemoMode(true)
-          localStorage.setItem('dashboardMode', 'demo')
-        }
-      } catch (err) {
-        console.error('Failed to enable demo mode', err)
-      }
+      setIsDemoMode(true)
+      localStorage.setItem('dashboardMode', 'demo')
     } else {
       setIsDemoMode(false)
       localStorage.setItem('dashboardMode', 'real')
@@ -254,11 +245,12 @@ export default function Dashboard({ user, signIn, signOut }) {
   const languages = isDemoMode ? seedDashData.languages : (realActivity.languages || []);
 
   const getTabIssues = () => {
-    if (activeTab === 'Saved') return currentDashIssues;
     if (isDemoMode) {
+      if (activeTab === 'Saved') return seedDashData.savedIssues || [];
       if (activeTab === 'Open PR') return seedDashData.openPRs || [];
       if (activeTab === 'Closed PRs') return seedDashData.closedPRs || [];
     } else {
+      if (activeTab === 'Saved') return currentDashIssues;
       if (activeTab === 'Closed PRs') {
         return (mergedPrs.recentMerged || []).map(pr => ({
           issue_title: pr.title,
@@ -441,11 +433,11 @@ export default function Dashboard({ user, signIn, signOut }) {
             <div className="space-y-3">
               <div className="flex items-center gap-2">
                 <span className="px-3 py-1 bg-[var(--border)] rounded-full text-xs font-medium">Good First issue</span>
-                <span className="text-xs text-[var(--text-muted)]">x{currentDashTotalDone || 0}</span>
+                <span className="text-xs text-[var(--text-muted)]">x{isDemoMode ? 30 : (currentDashTotalDone || 0)}</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="px-3 py-1 bg-[var(--border)] rounded-full text-xs font-medium">Ui Fixes</span>
-                <span className="text-xs text-[var(--text-muted)]">x0</span>
+                <span className="text-xs text-[var(--text-muted)]">x{isDemoMode ? 12 : 0}</span>
               </div>
             </div>
           </div>

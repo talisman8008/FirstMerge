@@ -18,9 +18,13 @@ function debounce(func, wait) {
   };
 }
 
-function LoadingSkeleton() {
+function LoadingSkeleton({ viewMode }) {
+  const containerClass = viewMode === 'grid' 
+    ? "grid grid-cols-1 xl:grid-cols-2 gap-4 w-full" 
+    : "flex flex-col gap-4 w-full";
+    
   return (
-    <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 w-full">
+    <div className={containerClass}>
       {[1, 2, 3, 4, 5, 6].map((i) => (
         <div key={i} className="bg-[var(--bg-card)] border border-[var(--border)] rounded-lg p-4 h-[180px] flex flex-col justify-between animate-pulse">
           <div className="flex justify-between items-start">
@@ -55,6 +59,7 @@ function LoadingSkeleton() {
 
 export default function Explore() {
   const { user, signIn, signOut } = useAuth()
+  const [viewMode, setViewMode] = useState('grid') // 'grid' or 'list'
 
   const [sidebarFilters, setSidebarFilters] = useState({
     languages: ['Python'],
@@ -149,7 +154,16 @@ export default function Explore() {
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <button className="p-1.5 rounded bg-[var(--bg-card-hover)] text-[var(--text-primary)] border border-[var(--border)]">
+                {/* Grid View Button */}
+                <button 
+                  onClick={() => setViewMode('grid')}
+                  className={`p-1.5 rounded transition-colors ${
+                    viewMode === 'grid'
+                      ? 'bg-[var(--bg-card-hover)] text-[var(--text-primary)] border border-[var(--accent-blue)] shadow-[0_0_0_1px_var(--accent-blue)]'
+                      : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] border border-transparent hover:bg-[var(--bg-card-hover)]'
+                  }`}
+                  title="Grid view"
+                >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <rect x="3" y="3" width="7" height="7"></rect>
                     <rect x="14" y="3" width="7" height="7"></rect>
@@ -157,7 +171,17 @@ export default function Explore() {
                     <rect x="3" y="14" width="7" height="7"></rect>
                   </svg>
                 </button>
-                <button className="p-1.5 rounded text-[var(--text-muted)] hover:text-[var(--text-primary)] border border-transparent hover:bg-[var(--bg-card-hover)]">
+
+                {/* List View Button */}
+                <button 
+                  onClick={() => setViewMode('list')}
+                  className={`p-1.5 rounded transition-colors ${
+                    viewMode === 'list'
+                      ? 'bg-[var(--bg-card-hover)] text-[var(--text-primary)] border border-[var(--accent-blue)] shadow-[0_0_0_1px_var(--accent-blue)]'
+                      : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] border border-transparent hover:bg-[var(--bg-card-hover)]'
+                  }`}
+                  title="List view"
+                >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <line x1="8" y1="6" x2="21" y2="6"></line>
                     <line x1="8" y1="12" x2="21" y2="12"></line>
@@ -212,15 +236,15 @@ export default function Explore() {
             {/* Issue list */}
             {!noLanguagesSelected && !error && (
               <>
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                <div className={viewMode === 'grid' ? "grid grid-cols-1 xl:grid-cols-2 gap-4" : "flex flex-col gap-4"}>
                   {issues.map((issue) => (
-                    <IssueCard key={`${issue.repo_name}-${issue.number}-${issue.id}`} issue={issue} />
+                    <IssueCard key={`${issue.repo_name}-${issue.number}-${issue.id}`} issue={issue} viewMode={viewMode} />
                   ))}
                 </div>
 
                 {loading && (
                   <div className={`w-full ${issues.length > 0 ? 'mt-4' : ''}`}>
-                    <LoadingSkeleton />
+                    <LoadingSkeleton viewMode={viewMode} />
                   </div>
                 )}
 

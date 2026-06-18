@@ -5,7 +5,7 @@ import supabase from '../lib/supabase.js'
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000'
 
-export default function IssueCard({ issue }) {
+export default function IssueCard({ issue, viewMode = 'grid' }) {
   const navigate = useNavigate()
   const {
     title,
@@ -87,6 +87,89 @@ export default function IssueCard({ issue }) {
 
   // Filter labels
   const interestingLabels = labels.filter(l => l.toLowerCase() !== 'good first issue').slice(0, 2);
+
+  if (viewMode === 'list') {
+    return (
+      <div 
+        onClick={handleRowClick}
+        className="bg-[var(--bg-card)] border border-[var(--border)] rounded-lg p-3 hover:border-[var(--border-hover)] hover:bg-[var(--bg-card-hover)] transition-all duration-150 cursor-pointer flex flex-col md:flex-row md:items-center justify-between gap-4"
+      >
+        {/* Left: Avatar + Repo Info */}
+        <div className="flex gap-3 items-center md:w-[220px] flex-shrink-0">
+          <div 
+            className="w-8 h-8 rounded-md flex items-center justify-center font-mono text-white text-[13px] font-semibold flex-shrink-0"
+            style={{ backgroundColor: avatarColor }}
+          >
+            {firstLetter}
+          </div>
+          <div className="flex flex-col overflow-hidden">
+            <span className="font-mono text-[12px] font-normal text-[var(--text-muted)] truncate">
+              {repo_name}
+            </span>
+            {language && (
+              <span className="font-sans text-[11px] font-medium w-max px-[6px] py-[1px] rounded-[4px] mt-0.5 bg-[rgba(255,255,255,0.08)] border border-[rgba(255,255,255,0.2)] text-[var(--text-primary)]">
+                {language}
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Middle: Title + Labels + Time */}
+        <div className="flex flex-col flex-1 min-w-0 pr-4">
+          <h3 className="font-sans text-[14px] font-semibold text-[var(--text-primary)] truncate leading-[1.5] mb-1">
+            {title}
+          </h3>
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 font-sans text-[11px] text-[var(--text-muted)]">
+            {interestingLabels.length > 0 && (
+              <div className="flex items-center gap-2 mr-2">
+                {interestingLabels.map(lbl => (
+                  <span key={lbl} className="bg-[rgba(255,255,255,0.06)] border border-[rgba(255,255,255,0.12)] text-[var(--text-muted)] rounded-[4px] px-[6px] py-[1px] truncate max-w-[120px]">
+                    {lbl}
+                  </span>
+                ))}
+              </div>
+            )}
+            {stars !== undefined && (
+              <span className="flex items-center gap-1 font-mono">
+                <span className="text-[11px]">★</span> {stars.toLocaleString()}
+              </span>
+            )}
+            {stars !== undefined && <span className="text-[var(--text-faint)]">·</span>}
+            <span>opened {timeText}</span>
+            {open_pr_count >= 2 && (
+              <>
+                <span className="text-[var(--text-faint)]">·</span>
+                <span className="text-[var(--accent-amber)] font-medium">⚠ {open_pr_count} open PRs</span>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Right: Score + Actions */}
+        <div className="flex items-center justify-between md:justify-end gap-6 flex-shrink-0 w-full md:w-auto mt-2 md:mt-0 pt-2 md:pt-0 border-t border-[var(--border)] md:border-0">
+          <ScoreRing score={friendliness_score ?? 0} />
+          
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={handleSaveIssue}
+              disabled={savingStatus !== 'idle'}
+              className={`font-sans text-[12px] transition-colors
+                ${(savingStatus === 'saved' || savingStatus === 'already_saved') ? 'text-[var(--accent-green)]' : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'}
+                ${savingStatus === 'saving' ? 'opacity-50 cursor-wait' : ''}
+                ${savingStatus === 'error' ? 'text-[var(--accent-red)]' : ''}`}
+            >
+              {savingStatus === 'idle' ? 'Save' : 
+               savingStatus === 'saving' ? '...' : 
+               (savingStatus === 'saved' || savingStatus === 'already_saved') ? 'Saved' : 'Err'}
+            </button>
+            <span className="font-sans text-[12px] text-[var(--text-muted)] hover:text-[var(--accent-green)] transition-colors whitespace-nowrap">
+              View →
+            </span>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div 

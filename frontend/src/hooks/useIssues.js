@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { fetchIssues } from '../lib/github.js'
+import supabase from '../lib/supabase.js'
 
 export default function useIssues(initialFilters) {
   const [issues, setIssues] = useState([])
@@ -20,6 +21,23 @@ export default function useIssues(initialFilters) {
     _applied: initialFilters?._applied || Date.now()
   })
 
+  // Cache saved urls so we don't spam the DB
+  const savedUrlsRef = useRef(null)
+
+  const getSavedUrls = async () => {
+    if (savedUrlsRef.current) return savedUrlsRef.current;
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) return new Set()
+      const { data } = await supabase.from('saved_issues').select('issue_url').eq('user_id', session.user.id)
+      const urls = new Set((data || []).map(i => i.issue_url))
+      savedUrlsRef.current = urls
+      return urls
+    } catch(e) {
+      return new Set()
+    }
+  }
+
   // Whenever filters logic effectively changes (like a new language, skillLevel, or Apply Filters is clicked)
   useEffect(() => {
     let active = true
@@ -29,16 +47,20 @@ export default function useIssues(initialFilters) {
       setError(null)
       setIssues([]) // clear previous
       
-      const result = await fetchIssues(filters.language, filters.skillLevel, 1, filters.labels, filters.searchQuery)
+      const [result, savedUrls] = await Promise.all([
+        fetchIssues(filters.language, filters.skillLevel, 1, filters.labels, filters.searchQuery),
+        getSavedUrls()
+      ])
       
       if (!active) return
 
       if (result.error) {
         setError(result.error)
       } else {
-        // Filter by minScore on the client side since API doesn't support it directly yet
+        // Filter by minScore and exclude already saved/solved issues
         const filteredData = (result.data || []).filter(issue => 
-          (issue.friendliness_score ?? 0) >= filters.minScore
+          (issue.friendliness_score ?? 0) >= filters.minScore &&
+          !savedUrls.has(issue.url)
         )
         setIssues(filteredData)
         setHasMore(result.has_more)
@@ -61,13 +83,17 @@ export default function useIssues(initialFilters) {
     setError(null)
     
     const nextPage = filters.page + 1
-    const result = await fetchIssues(filters.language, filters.skillLevel, nextPage, filters.labels, filters.searchQuery)
+    const [result, savedUrls] = await Promise.all([
+      fetchIssues(filters.language, filters.skillLevel, nextPage, filters.labels, filters.searchQuery),
+      getSavedUrls()
+    ])
     
     if (result.error) {
       setError(result.error)
     } else {
       const filteredData = (result.data || []).filter(issue => 
-        (issue.friendliness_score ?? 0) >= filters.minScore
+        (issue.friendliness_score ?? 0) >= filters.minScore &&
+        !savedUrls.has(issue.url)
       )
       setIssues(prev => [...prev, ...filteredData])
       setFilters(prev => ({ ...prev, page: nextPage }))

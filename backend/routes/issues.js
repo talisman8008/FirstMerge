@@ -149,6 +149,11 @@ router.get('/', async (req, res) => {
         let combinedData = null
         if (!liveHit || !scoreHit) {
           combinedData = await getCombinedRepoAndIssueData(owner, repo, issue.number)
+          
+          if (combinedData && combinedData.mergedPRCount > 0) {
+            console.log(`[issues] Skipping ${repoFullName}#${issue.number} as it has a merged PR`)
+            continue // Skip adding it to enriched, effectively hiding it from explore
+          }
         }
 
         const liveness = await checkIssueLiveness(owner, repo, issue.number, combinedData?.openPRCount ?? null)

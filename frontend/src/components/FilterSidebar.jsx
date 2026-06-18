@@ -1,8 +1,13 @@
+import { useState } from 'react';
+
 const LANGUAGES = [
-  'Angular', 'C', 'C#', 'C++', 'CSS', 'Dart', 'Elixir', 'Ember', 'Go', 'Haskell', 
-  'HTML', 'Java', 'JavaScript', 'Kotlin', 'Lua', 'Next.js', 'Node.js', 'Nuxt.js', 
-  'Objective-C', 'Perl', 'PHP', 'Python', 'R', 'React', 'Ruby', 'Rust', 'Scala', 
-  'Shell', 'Svelte', 'Swift', 'TypeScript', 'Vue'
+  // Top programming languages based on GitHub Octoverse contributions
+  'JavaScript', 'Python', 'TypeScript', 'Java', 'C#', 'C++', 'PHP', 'C', 
+  'Shell', 'Go', 'Ruby', 'Rust', 'Swift', 'Kotlin', 'Dart', 'Objective-C',
+  // Popular Markup/Styles & Frameworks (often searched)
+  'HTML', 'CSS', 'React', 'Node.js', 'Vue', 'Angular', 'Next.js', 'Svelte',
+  // Others
+  'Scala', 'Lua', 'Perl', 'R', 'Nuxt.js', 'Ember', 'Elixir', 'Haskell'
 ]
 const SKILL_LEVELS = ['Beginner', 'Intermediate', 'Advanced']
 const LABELS = [
@@ -15,6 +20,8 @@ const LABELS = [
 ]
 
 export default function FilterSidebar({ filters, onFilterChange }) {
+  const [showAllLanguages, setShowAllLanguages] = useState(false);
+
   const {
     languages = [],
     skillLevel = '',
@@ -86,19 +93,25 @@ export default function FilterSidebar({ filters, onFilterChange }) {
           Language
         </p>
         <div className="flex flex-wrap gap-2">
-          {LANGUAGES.map(lang => (
+          {(showAllLanguages ? LANGUAGES : Array.from(new Set([...LANGUAGES.slice(0, 14), ...(languages || [])]))).map(lang => (
             <button
               key={lang}
               onClick={() => toggleLanguage(lang)}
               className={`
                 font-sans text-[12px] font-normal px-[12px] py-[5px] rounded-[4px] transition-all duration-150
-                ${languages.includes(lang) 
+                ${(languages || []).includes(lang) 
                   ? 'bg-[var(--bg-selected)] text-[var(--text-primary)] border border-[var(--border-selected)]' 
                   : 'bg-transparent text-[var(--text-muted)] border border-[var(--border)] hover:border-[var(--border-hover)] hover:text-[var(--text-primary)]'}
               `}>
               {lang}
             </button>
           ))}
+          <button
+            onClick={() => setShowAllLanguages(!showAllLanguages)}
+            className="mt-1 font-sans text-[12px] font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors duration-150 px-[4px] py-[5px]"
+          >
+            {showAllLanguages ? 'Read less' : 'Read more'}
+          </button>
         </div>
       </div>
 
