@@ -265,22 +265,31 @@ export default function Home({ user, signIn, signOut }) {
             </p>
           </FadeIn>
           <FadeIn delay={200}>
-            {user ? (
+            <div className="flex flex-col sm:flex-row items-center gap-4">
+              {user ? (
+                <button
+                  onClick={() => navigate('/dashboard')}
+                  className="bg-[var(--accent-green)] text-[var(--bg-primary)] font-display text-[16px] px-8 py-4 rounded-[6px] transition-transform hover:scale-95 flex items-center gap-3 font-medium"
+                >
+                  Go to Dashboard
+                </button>
+              ) : (
+                <button
+                  onClick={signIn}
+                  className="bg-[var(--accent-green)] text-[var(--bg-primary)] font-display text-[16px] px-8 py-4 rounded-[6px] transition-transform hover:scale-95 flex items-center gap-3 font-medium"
+                >
+                  <GitHubIcon />
+                  Continue with GitHub
+                </button>
+              )}
               <button
-                onClick={() => navigate('/dashboard')}
-                className="bg-[var(--accent-green)] text-[var(--bg-primary)] font-display text-[16px] px-8 py-4 rounded-[6px] transition-transform hover:scale-95 flex items-center gap-3 font-medium"
+                onClick={() => alert('Download extension feature coming soon!')}
+                className="bg-transparent border-2 border-[var(--border)] text-[var(--text-primary)] hover:border-[var(--accent-blue)] hover:text-[var(--accent-blue)] font-display text-[16px] px-8 py-4 rounded-[6px] transition-colors flex items-center gap-3 font-medium btn-scale"
               >
-                Go to Dashboard
+                <span className="text-[20px]">🧩</span>
+                Install Extension
               </button>
-            ) : (
-              <button
-                onClick={signIn}
-                className="bg-[var(--accent-green)] text-[var(--bg-primary)] font-display text-[16px] px-8 py-4 rounded-[6px] transition-transform hover:scale-95 flex items-center gap-3 font-medium"
-              >
-                <GitHubIcon />
-                Continue with GitHub
-              </button>
-            )}
+            </div>
           </FadeIn>
           <FadeIn delay={300} className="mt-6">
             <p className="font-mono text-[12px] text-[var(--text-muted)] uppercase tracking-widest text-center">

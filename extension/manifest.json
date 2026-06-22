@@ -1,0 +1,37 @@
+{
+  "manifest_version": 3,
+  "name": "FirstMerge Extension",
+  "version": "1.0",
+  "description": "A browser extension to analyze pull requests using the FirstMerge backend.",
+  "icons": {
+    "16": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Open FirstMerge",
+    "default_icon": "icon.png"
+  },
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting"
+  ],
+  "host_permissions": [
+    "http://localhost:3000/*",
+    "https://github.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["https://github.com/*/*/pull/*"],
+      "js": ["content.js"]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["icon.svg", "icon.png"],
+      "matches": ["https://github.com/*"]
+    }
+  ]
+}

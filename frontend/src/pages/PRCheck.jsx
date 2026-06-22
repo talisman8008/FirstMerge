@@ -239,6 +239,15 @@ export default function PRCheck({ user, signIn, signOut }) {
             <p className="font-sans text-[15px] text-[var(--text-muted)] max-w-[400px] mx-auto leading-relaxed">
               Get AI-powered guidance before you code, or a verdict after you open your PR.
             </p>
+            <div className="mt-6 flex items-center justify-center gap-3 p-4 bg-[color-mix(in_srgb,var(--accent-blue)_10%,transparent)] border border-[color-mix(in_srgb,var(--accent-blue)_20%,transparent)] rounded-lg max-w-[500px] mx-auto animate-[fadeIn_0.5s_ease-out]">
+              <span className="text-[20px]">🧩</span>
+              <p className="font-sans text-[13px] text-[var(--text-primary)] text-left">
+                <strong style={{ color: 'var(--accent-blue)' }}>Pro Tip:</strong> Install our Chrome Extension to get automatic analysis right inside GitHub!
+              </p>
+              <button className="whitespace-nowrap font-mono text-[11px] font-bold uppercase tracking-wider bg-[var(--accent-blue)] text-[#F2F1F7] px-4 py-2 rounded-md hover:opacity-90 btn-scale focus:outline-none shadow-none" onClick={() => alert('Download extension feature coming soon!')}>
+                GET IT NOW
+              </button>
+            </div>
           </div>
 
           <div className="flex items-center justify-center gap-2 mb-10 bg-[var(--bg-card)] p-1.5 rounded-lg border-2 border-[var(--border)] max-w-fit mx-auto shadow-none">

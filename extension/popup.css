@@ -1,0 +1,110 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap');
+
+:root {
+  --bg-primary: #17151F;
+  --bg-card: #211F2E;
+  --border: #322F42;
+  --text-primary: #F2F1F7;
+  --text-muted: #9C99AD;
+  --accent-blue: #6B71B8;
+  --font-body: 'DM Sans', sans-serif;
+}
+
+body {
+  font-family: var(--font-body);
+  width: 320px;
+  margin: 0;
+  padding: 16px;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  text-decoration: none;
+  color: inherit;
+  transition: opacity 0.2s;
+}
+
+.header:hover {
+  opacity: 0.8;
+}
+
+.logo {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+}
+
+h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+/* Removed checkPrBtn styles since it is fully automatic now */
+
+#dashboardBtn {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  text-align: center;
+  padding: 12px;
+  background-color: transparent;
+  color: #F2F1F7;
+  border: 1px solid #45415A;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  text-decoration: none;
+  transition: opacity 0.2s, background-color 0.2s;
+}
+
+#dashboardBtn:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+button:active {
+  transform: scale(0.97);
+}
+
+#status {
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background-color: var(--bg-card);
+  color: var(--accent-blue);
+  border: 1px solid var(--border);
+  display: inline-block;
+  align-self: flex-start;
+}
+
+#result {
+  margin-top: 10px;
+  font-size: 13px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background-color: var(--bg-card);
+  display: none;
+  color: var(--text-muted);
+  white-space: pre-wrap;
+}
