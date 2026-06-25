@@ -20,12 +20,23 @@
   ],
   "host_permissions": [
     "http://localhost:3000/*",
-    "https://github.com/*"
+    "https://github.com/*",
+    "https://*.supabase.co/*"
   ],
+  "background": {
+    "service_worker": "background.js"
+  },
   "content_scripts": [
     {
-      "matches": ["https://github.com/*/*/pull/*"],
+      "matches": ["https://github.com/*/*/compare/*"],
       "js": ["content.js"]
+    },
+    {
+      "matches": [
+        "http://localhost:5173/*",
+        "https://your-frontend.vercel.app/*"
+      ],
+      "js": ["authSync.js"]
     }
   ],
   "web_accessible_resources": [

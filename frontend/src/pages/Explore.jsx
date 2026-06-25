@@ -61,24 +61,47 @@ export default function Explore() {
   const { user, signIn, signOut } = useAuth()
   const [viewMode, setViewMode] = useState('grid') // 'grid' or 'list'
 
-  const [sidebarFilters, setSidebarFilters] = useState({
-    languages: ['JavaScript'],
-    skillLevel: 'Beginner',
-    minScore: 0,
-    searchQuery: '',
-    labels: ['good-first-issue'],
-    _applied: 0
+  const [sidebarFilters, setSidebarFilters] = useState(() => {
+    try {
+      const saved = localStorage.getItem('exploreFilters')
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        return { ...parsed, _applied: 0 }
+      }
+    } catch (e) {
+      console.error('Failed to parse saved filters', e)
+    }
+    return {
+      languages: ['JavaScript'],
+      skillLevel: 'Beginner',
+      minScore: 0,
+      searchQuery: '',
+      labels: ['good-first-issue'],
+      _applied: 0
+    }
   })
 
-  const [fetchParams, setFetchParams] = useState({
-    language: 'JavaScript',
-    page: 1,
-    skillLevel: 'beginner',
-    minScore: 0,
-    searchQuery: '',
-    labels: ['good-first-issue'],
-    _applied: 0
+  const [fetchParams, setFetchParams] = useState(() => {
+    return {
+      language: sidebarFilters.languages.join(',') || 'JavaScript',
+      page: 1,
+      skillLevel: sidebarFilters.skillLevel.toLowerCase() || 'beginner',
+      minScore: parseInt(sidebarFilters.minScore, 10) || 0,
+      searchQuery: sidebarFilters.searchQuery || '',
+      labels: sidebarFilters.labels || ['good-first-issue'],
+      _applied: 0
+    }
   })
+
+  useEffect(() => {
+    localStorage.setItem('exploreFilters', JSON.stringify({
+      languages: sidebarFilters.languages,
+      skillLevel: sidebarFilters.skillLevel,
+      minScore: sidebarFilters.minScore,
+      searchQuery: sidebarFilters.searchQuery,
+      labels: sidebarFilters.labels
+    }))
+  }, [sidebarFilters.languages, sidebarFilters.skillLevel, sidebarFilters.minScore, sidebarFilters.searchQuery, sidebarFilters.labels])
 
   const { issues, loading, error, hasMore, totalCount, fetchMore, setFilters: setHookFilters } = useIssues(fetchParams)
 

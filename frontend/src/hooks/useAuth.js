@@ -12,12 +12,34 @@ export default function useAuth() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null)
       setLoading(false)
+      
+      if (session?.access_token) {
+        window.postMessage({ 
+          type: 'FM_AUTH_TOKEN', 
+          token: session.access_token,
+          refreshToken: session.refresh_token,
+          supabaseUrl: import.meta.env.VITE_SUPABASE_URL,
+          supabaseKey: import.meta.env.VITE_SUPABASE_ANON_KEY
+        }, '*')
+      }
     })
 
     // Listen for auth state changes (login, logout, token refresh)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null)
       setLoading(false)
+
+      if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session?.access_token) {
+        window.postMessage({ 
+          type: 'FM_AUTH_TOKEN', 
+          token: session.access_token,
+          refreshToken: session.refresh_token,
+          supabaseUrl: import.meta.env.VITE_SUPABASE_URL,
+          supabaseKey: import.meta.env.VITE_SUPABASE_ANON_KEY
+        }, '*')
+      } else if (event === 'SIGNED_OUT') {
+        window.postMessage({ type: 'FM_AUTH_LOGOUT' }, '*')
+      }
     })
 
     return () => subscription.unsubscribe()
@@ -28,14 +50,18 @@ export default function useAuth() {
       provider: 'github',
       options: {
         redirectTo: window.location.origin,
+        queryParams: {
+          prompt: 'consent',
+        },
       },
     })
   }
 
   const signOut = async () => {
     await supabase.auth.signOut()
-    setUser(null)
-    navigate('/')
+    localStorage.clear()
+    sessionStorage.clear()
+    window.location.href = '/'
   }
 
   return { user, loading, signIn, signOut }

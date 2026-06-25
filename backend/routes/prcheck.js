@@ -64,6 +64,13 @@ function parseIssueUrl(issueUrl) {
   return { owner: match[1], repo: match[2], issueNumber: parseInt(match[3], 10) }
 }
 
+function parseCompareUrl(compareUrl) {
+  // e.g. https://github.com/owner/repo/compare/main...branch
+  const match = compareUrl?.match(/github\.com\/([^/]+)\/([^/]+)\/compare\/(.+)/)
+  if (!match) return null
+  return { owner: match[1], repo: match[2], branchCompare: match[3] }
+}
+
 // ── POST /api/prcheck/after ──────────────────────────────────────────────────
 
 router.post('/after', requireAuth, async (req, res) => {
@@ -105,6 +112,105 @@ router.post('/after', requireAuth, async (req, res) => {
     return res.json(result)
   } catch (err) {
     console.error('[prcheck] POST /after failed:', err.message)
+    return res.status(500).json({ error: err.message || 'Internal server error' })
+  }
+})
+
+// ── POST /api/prcheck/compare ────────────────────────────────────────────────
+
+router.post('/compare', requireAuth, async (req, res) => {
+  try {
+    const { compareUrl, title, body } = req.body
+
+    if (!compareUrl) {
+      return res.status(400).json({ error: 'compareUrl is required' })
+    }
+
+    const parsed = parseCompareUrl(compareUrl)
+    if (!parsed) {
+      return res.status(400).json({ error: 'Invalid compare URL. Format: https://github.com/owner/repo/compare/...' })
+    }
+
+    const { owner, repo } = parsed
+
+    // Fetch the diff directly from GitHub's web view
+    const cleanUrl = compareUrl.split('?')[0].split('#')[0]
+    
+    const headers = process.env.GITHUB_TOKEN ? {
+      Authorization: `token ${process.env.GITHUB_TOKEN}`,
+      Accept: 'application/vnd.github.v3.diff'
+    } : {}
+    
+    const diffResponse = await fetch(`${cleanUrl}.diff`, { headers })
+    
+    if (!diffResponse.ok) {
+      return res.status(404).json({ error: `Could not fetch diff. GitHub returned ${diffResponse.status}. Make sure the branch has commits and the backend has access to it.` })
+    }
+    const diff = await diffResponse.text()
+
+    // Fetch context (contributing guidelines, closed PRs) to pass to AI
+    // We don't fetch linked issue automatically here since it's just a raw compare,
+    // but we use the live title/body passed from the extension form.
+    const { getContributing } = await import('../services/github.js')
+    const contributing = await getContributing(owner, repo).catch(() => '')
+    
+    // We can just use the recent closed PRs helper if we expose it, or fetch it.
+    // For now we can skip it or fetch it quickly. 
+    const { getRepoPRs } = await import('../services/github.js')
+    let recentClosedPRs = []
+    try {
+      const prs = await getRepoPRs(owner, repo, 5)
+      recentClosedPRs = prs.map((pr) => ({ title: pr.title || '', merged: pr.merged_at !== null }))
+    } catch(err) { /* ignore */ }
+
+    // Detect and fetch linked GitHub issues
+    let linkedIssueTitle = title || 'Draft Pull Request'
+    let linkedIssueBody = body || ''
+
+    const issueRegex = /#(\d+)/g
+    let issueMatch = null
+    
+    const titleMatches = [...(title || '').matchAll(issueRegex)]
+    if (titleMatches.length > 0) {
+      issueMatch = titleMatches[0][1]
+    } else {
+      const bodyMatches = [...(body || '').matchAll(issueRegex)]
+      if (bodyMatches.length > 0) {
+        issueMatch = bodyMatches[0][1]
+      }
+    }
+
+    if (issueMatch) {
+      try {
+        const ghHeaders = process.env.GITHUB_TOKEN ? {
+          Authorization: `token ${process.env.GITHUB_TOKEN}`,
+          Accept: 'application/vnd.github.v3+json'
+        } : { Accept: 'application/vnd.github.v3+json' }
+        
+        const issueRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/issues/${issueMatch}`, { headers: ghHeaders })
+        if (issueRes.ok) {
+          const issueJson = await issueRes.json()
+          linkedIssueTitle = issueJson.title || linkedIssueTitle
+          linkedIssueBody = issueJson.body || linkedIssueBody
+        }
+      } catch (err) {
+        // Silently fall back to PR title/body on failure
+      }
+    }
+
+    // Analyse with Gemini
+    const result = await analyzeContribution({
+      issueTitle: linkedIssueTitle,
+      issueBody: linkedIssueBody,
+      contributing,
+      recentClosedPRs,
+      diff,
+      mode: 'after', // we use the 'after' prompt to verify the diff against the title/body
+    })
+
+    return res.json(result)
+  } catch (err) {
+    console.error('[prcheck] POST /compare failed:', err.message)
     return res.status(500).json({ error: err.message || 'Internal server error' })
   }
 })

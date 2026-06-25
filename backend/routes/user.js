@@ -153,12 +153,16 @@ router.get('/merged-prs', requireAuth, async (req, res) => {
     if (cacheEntry && cacheEntry.cached_at) {
       const cacheAge = Date.now() - new Date(cacheEntry.cached_at).getTime()
       if (cacheAge < 1000 * 60 * 60 && cacheEntry.data_json && cacheEntry.data_json.recentOpen) {
-        console.log(`[merged-prs] cache HIT for user: ${username}`)
+        if (process.env.NODE_ENV !== 'production') {
+          console.log(`[merged-prs] cache HIT for user: ${username}`)
+        }
         return res.json(cacheEntry.data_json)
       }
     }
 
-    console.log(`[merged-prs] cache MISS for user: ${username} — fetching GitHub`)
+    if (process.env.NODE_ENV !== 'production') {
+      console.log(`[merged-prs] cache MISS for user: ${username} — fetching GitHub`)
+    }
 
     // Fetch from GitHub GraphQL
     const query = `

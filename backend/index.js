@@ -13,8 +13,14 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // ── Middleware ────────────────────────────────────────────────────────────────
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://github.com',
+  process.env.ALLOWED_ORIGIN
+].filter(Boolean);
+
 app.use(cors({
-  origin: process.env.ALLOWED_ORIGIN || 'http://localhost:5173',
+  origin: allowedOrigins,
   credentials: true
 }));
 app.use(express.json({ limit: '10kb' }));
