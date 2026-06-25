@@ -45,7 +45,9 @@ export async function checkIssueLiveness(owner, repo, issueNumber, preFetchedOpe
       if (data?.cached_at) {
         const ageMs = Date.now() - new Date(data.cached_at).getTime()
         if (ageMs < CACHE_TTL_MS) {
-          console.log(`[cache] HIT for issue: ${cacheKey}`)
+          if (process.env.NODE_ENV !== 'production') {
+            console.log(`[cache] HIT for issue: ${cacheKey}`)
+          }
           return {
             openPRCount: data.open_pr_count,
             status: resolveStatus(data.open_pr_count),
@@ -59,7 +61,9 @@ export async function checkIssueLiveness(owner, repo, issueNumber, preFetchedOpe
       console.warn(`[livenessCheck] cache read failed for ${cacheKey}, fetching live`)
     }
 
-    console.log(`[cache] MISS for issue: ${cacheKey}`)
+    if (process.env.NODE_ENV !== 'production') {
+      console.log(`[cache] MISS for issue: ${cacheKey}`)
+    }
 
     // ── 2. Fetch live from GitHub ─────────────────────────────────────────────
     const openPRCount = preFetchedOpenPRCount !== null ? preFetchedOpenPRCount : await getIssueOpenPRs(owner, repo, issueNumber)

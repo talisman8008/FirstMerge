@@ -52,7 +52,11 @@ export async function searchIssues(language, skillLevel, labels = ['good-first-i
       'next.js': '"Next.js" language:typescript',
       'nuxt.js': '"Nuxt.js" language:javascript',
       'node.js': '"Node.js" language:javascript',
-      'ember': 'Ember language:javascript'
+      'ember': 'Ember language:javascript',
+      'django': 'Django language:python',
+      'flask': 'Flask language:python',
+      'spring': 'Spring language:java',
+      'bootstrap': 'Bootstrap language:html'
     }
 
     const langLower = language.toLowerCase()
@@ -92,7 +96,7 @@ export async function searchIssues(language, skillLevel, labels = ['good-first-i
       console.log('[github] Search query being sent:', q)
     }
 
-    const data = await ghGraphQL(query, { query: q, first: 30 })
+    const data = await ghGraphQL(query, { query: q, first: 100 })
     if (process.env.NODE_ENV !== 'production') {
       console.log('[issues] Raw GitHub response:', JSON.stringify(data?.search, null, 2).slice(0, 500))
       console.log('[github] Issues found:', data?.search?.issueCount)

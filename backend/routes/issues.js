@@ -78,7 +78,9 @@ router.get('/', async (req, res) => {
       if (data?.cached_at) {
         const ageMs = Date.now() - new Date(data.cached_at).getTime()
         if (ageMs < CACHE_TTL_MS) {
-          console.log(`[cache] HIT for issues: ${cacheKey}`)
+          if (process.env.NODE_ENV !== 'production') {
+            console.log(`[cache] HIT for issues: ${cacheKey}`)
+          }
           const fullEnriched = data.issues_json
           
           const filteredFullEnriched = fullEnriched.filter(issue => (issue.friendliness_score ?? 0) >= minScore)
@@ -102,7 +104,9 @@ router.get('/', async (req, res) => {
       // Non-fatal, fall through to fetch
     }
 
-    console.log(`[cache] MISS for issues: ${cacheKey}`)
+    if (process.env.NODE_ENV !== 'production') {
+      console.log(`[cache] MISS for issues: ${cacheKey}`)
+    }
 
     // 1. Fetch raw issues from GitHub — run language searches sequentially
     // to avoid parallel GraphQL calls hitting rate limits and silently dropping a language's results.
@@ -132,12 +136,16 @@ router.get('/', async (req, res) => {
       repoCounts[repoFullName] = (repoCounts[repoFullName] || 0) + 1
       return repoCounts[repoFullName] <= perRepoCap
     })
-    console.log('[issues] After dedup count:', rawIssues.length)
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('[issues] After dedup count:', rawIssues.length)
+    }
 
     // Quality filters
     rawIssues = rawIssues.filter(issue => issue.stars >= 10)
     rawIssues = rawIssues.filter(issue => /^[\x00-\x7F\s\p{P}]*$/u.test(issue.title))
-    console.log('[issues] After quality filter count:', rawIssues.length)
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('[issues] After quality filter count:', rawIssues.length)
+    }
 
     // 2. Enrich issues in batches to improve speed while avoiding rate-limit cascade
     const enriched = []
@@ -163,7 +171,9 @@ router.get('/', async (req, res) => {
             combinedData = await getCombinedRepoAndIssueData(owner, repo, issue.number)
             
             if (combinedData && combinedData.mergedPRCount > 0) {
-              console.log(`[issues] Skipping ${repoFullName}#${issue.number} as it has a merged PR`)
+              if (process.env.NODE_ENV !== 'production') {
+                console.log(`[issues] Skipping ${repoFullName}#${issue.number} as it has a merged PR`)
+              }
               return null // Skip adding it to enriched, effectively hiding it from explore
             }
           }

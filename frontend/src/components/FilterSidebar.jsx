@@ -1,13 +1,7 @@
 import { useState } from 'react';
 
 const LANGUAGES = [
-  // Top programming languages based on GitHub Octoverse contributions
-  'JavaScript', 'Python', 'TypeScript', 'Java', 'C#', 'C++', 'PHP', 'C', 
-  'Shell', 'Go', 'Ruby', 'Rust', 'Swift', 'Kotlin', 'Dart', 'Objective-C',
-  // Popular Markup/Styles & Frameworks (often searched)
-  'HTML', 'CSS', 'React', 'Node.js', 'Vue', 'Angular', 'Next.js', 'Svelte',
-  // Others
-  'Scala', 'Lua', 'Perl', 'R', 'Nuxt.js', 'Ember', 'Elixir', 'Haskell'
+  'JavaScript', 'TypeScript', 'Python', 'Java', 'HTML', 'CSS', 'Bootstrap', 'C++', 'Go', 'Rust', 'Kotlin', 'Swift', 'Dart', 'Ruby', 'PHP', 'C#', 'Scala', 'R', 'Julia', 'Elixir', 'Clojure', 'Haskell', 'Erlang', 'Vue', 'React', 'Node.js', 'Angular', 'Svelte', 'Next.js', 'Nuxt.js', 'Django', 'Flask', 'Spring'
 ]
 const SKILL_LEVELS = ['Beginner', 'Intermediate', 'Advanced']
 const LABELS = [

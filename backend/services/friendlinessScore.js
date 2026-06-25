@@ -132,7 +132,9 @@ export async function computeFriendlinessScore(owner, repo, issueCreatedAt, open
     if (data?.last_updated) {
       const ageMs = Date.now() - new Date(data.last_updated).getTime()
       if (ageMs < CACHE_TTL_MS) {
-        console.log(`[cache] HIT for repo: ${repoFullName}`)
+        if (process.env.NODE_ENV !== 'production') {
+          console.log(`[cache] HIT for repo: ${repoFullName}`)
+        }
         return {
           score: data.friendliness_score,
           breakdown: {
@@ -149,7 +151,9 @@ export async function computeFriendlinessScore(owner, repo, issueCreatedAt, open
     // Cache read failure is non-fatal
   }
 
-  console.log(`[cache] MISS for repo: ${repoFullName}`)
+  if (process.env.NODE_ENV !== 'production') {
+    console.log(`[cache] MISS for repo: ${repoFullName}`)
+  }
 
   let closedIssues = prefetchedClosedIssues
   let closedPRs = prefetchedClosedPRs
