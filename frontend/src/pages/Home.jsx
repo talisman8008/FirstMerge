@@ -15,7 +15,7 @@ const GitHubIcon = () => (
 import Aurora from '../components/ui/Aurora.jsx'
 import MergeField from '../components/ui/MergeField.jsx'
 import SpotlightCard from '../components/ui/SpotlightCard.jsx'
-
+import HorizontalScroller from '../components/HorizontalScroller.jsx'
 // Helper for generic fade-in
 const FadeIn = ({ children, delay = 0, className = "" }) => {
   return (
@@ -63,7 +63,7 @@ export default function Home({ user, signIn, signOut }) {
   const heroY = useTransform(scrollYProgress, [0, 0.2], [0, 100])
 
   return (
-    <div className="landing min-h-screen flex flex-col bg-[var(--bg-primary)] text-[var(--text-primary)] font-body relative overflow-hidden">
+    <div className="landing min-h-screen flex flex-col bg-[var(--bg-primary)] text-[var(--text-primary)] font-body relative">
       <Navbar user={user} signIn={signIn} signOut={signOut} />
 
       <main className="flex-1 flex flex-col w-full relative z-10">
@@ -219,16 +219,39 @@ export default function Home({ user, signIn, signOut }) {
               </div>
             </SpotlightCard>
 
-            {/* Seamless Extension (Span 7) */}
-            <SpotlightCard className="md:col-span-7 p-8 md:p-12 min-h-[400px] flex flex-col justify-center relative overflow-hidden group">
+            {/* Heatmap (Span 7) */}
+            <SpotlightCard className="md:col-span-7 p-8 md:p-10 min-h-[400px] flex flex-col justify-center overflow-hidden">
+              <div className="w-12 h-12 rounded-xl bg-[var(--accent-orange-dim)] border border-[color-mix(in_srgb,var(--accent-orange)_30%,transparent)] flex items-center justify-center mb-8">
+                <Activity size={24} className="text-[var(--accent-orange)]" />
+              </div>
+              <h3 className="font-display text-[28px] font-bold text-[var(--text-primary)] mb-4 leading-[1.1]">
+                Track what gets merged.
+              </h3>
+              <p className="text-[16px] text-[var(--text-muted)] mb-8">
+                Stop guessing what maintainers want. We analyze merge histories to show you exactly when and what gets merged.
+              </p>
+              <div className="w-full bg-[var(--bg-primary)] border border-[var(--border)] rounded-2xl p-4 md:p-6 overflow-x-auto shadow-inner flex items-center justify-center mask-fade-edges">
+                <div className="min-w-[600px] scale-[0.85] origin-left md:scale-100 md:origin-center">
+                  <Heatmap 
+                    data={seedActivity.heatmap} 
+                    totalIssues={133} 
+                    activeDays={99} 
+                    isDemoMode={false} 
+                  />
+                </div>
+              </div>
+            </SpotlightCard>
+
+            {/* Seamless Extension (Span 12) */}
+            <SpotlightCard className="md:col-span-12 p-8 md:p-10 min-h-[250px] flex flex-col justify-center relative overflow-hidden group">
               <div className="relative z-10 w-full md:w-[60%]">
-                <div className="w-12 h-12 rounded-xl bg-[var(--bg-selected)] border border-[var(--border-selected)] flex items-center justify-center mb-8">
+                <div className="w-12 h-12 rounded-xl bg-[var(--bg-selected)] border border-[var(--border-selected)] flex items-center justify-center mb-6">
                   <Code size={24} className="text-[var(--accent-blue)]" />
                 </div>
                 <h3 className="font-display text-[32px] font-bold text-[var(--text-primary)] mb-4 leading-[1.1]">
                   Zero-Friction Extension
                 </h3>
-                <p className="text-[18px] text-[var(--text-muted)] mb-8">
+                <p className="text-[16px] text-[var(--text-muted)] mb-6 max-w-[600px]">
                   The FirstMerge Chrome extension automatically injects the AI analysis panel directly into your GitHub PR timeline. No tabs to switch. No context switching.
                 </p>
                 <button className="text-[14px] font-bold text-[var(--accent-blue)] flex items-center gap-2 group-hover:gap-3 transition-all cursor-pointer">
@@ -238,22 +261,22 @@ export default function Home({ user, signIn, signOut }) {
               
               {/* Abstract decorative extension UI piece */}
               <motion.div 
-                className="absolute right-[-10%] top-[20%] w-[350px] h-[300px] hidden md:block"
-                initial={{ x: 200, rotate: 10, opacity: 0 }}
-                whileInView={{ x: 0, rotate: -5, opacity: 1 }}
+                className="absolute right-[-5%] top-[15%] w-[450px] h-[280px] hidden md:block"
+                initial={{ x: 300, rotate: 15, opacity: 0 }}
+                whileInView={{ x: 0, rotate: -3, opacity: 1 }}
                 viewport={{ once: true, margin: "-50px" }}
                 transition={{ duration: 1, delay: 0.2, type: "spring", bounce: 0.4 }}
               >
-                <div className="w-full h-full bg-[var(--bg-primary)] border border-[var(--border)] rounded-l-2xl shadow-2xl p-6 opacity-50 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500">
+                <div className="w-full h-full bg-[var(--bg-primary)] border border-[var(--border)] rounded-l-2xl shadow-2xl p-6 opacity-50 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500 flex flex-col">
                   <div className="w-full h-8 flex items-center gap-2 border-b border-[var(--border)] mb-4">
                     <div className="w-3 h-3 rounded-full bg-[var(--border)]" />
                     <div className="w-3 h-3 rounded-full bg-[var(--border)]" />
                     <div className="w-3 h-3 rounded-full bg-[var(--border)]" />
                   </div>
-                  <div className="space-y-4">
+                  <div className="space-y-4 flex-1">
                     <div className="w-[80%] h-4 bg-[var(--border)] rounded-full" />
                     <div className="w-[60%] h-4 bg-[var(--border)] rounded-full" />
-                    <div className="w-full h-24 bg-[var(--accent-blue-dim)] rounded-lg border border-[var(--border-selected)] mt-6" />
+                    <div className="w-full h-20 bg-[var(--accent-blue-dim)] rounded-lg border border-[var(--border-selected)] mt-6" />
                   </div>
                 </div>
               </motion.div>
@@ -262,55 +285,7 @@ export default function Home({ user, signIn, signOut }) {
           </div>
         </section>
 
-        {/* CONTRIBUTION RECORD */}
-        <section className="w-full relative py-[120px] bg-[var(--bg-card)] border-y border-[var(--border)]">
-          <div className="max-w-[1200px] mx-auto px-6">
-            <div className="text-center mb-16">
-              <FadeIn>
-                <h2 className="font-display text-[40px] md:text-[56px] font-bold text-[var(--text-primary)] leading-[1.1] tracking-[-0.02em]">
-                  Track what actually gets <span className="text-[var(--accent-orange)]">merged.</span>
-                </h2>
-              </FadeIn>
-            </div>
-            
-            <FadeIn delay={0.2}>
-              <div className="bg-[var(--bg-primary)] border border-[var(--border)] rounded-2xl p-6 md:p-10 max-w-[1000px] mx-auto mb-12 overflow-x-auto shadow-none">
-                <Heatmap 
-                  data={seedActivity.heatmap} 
-                  totalIssues={133} 
-                  activeDays={99} 
-                  isDemoMode={false} 
-                />
-              </div>
-            </FadeIn>
-
-            <FadeIn delay={0.4}>
-              <div className="flex flex-wrap gap-8 items-center justify-center max-w-[900px] mx-auto">
-                <div className="flex flex-col items-center gap-3">
-                  <div className="w-14 h-14 rounded-full flex items-center justify-center bg-[var(--bg-primary)] border border-[var(--border)] hover:border-[var(--accent-orange)] transition-all duration-300 hover:scale-110 relative group">
-                    <div className="absolute inset-0 rounded-full bg-[var(--accent-orange-dim)] blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
-                    <img src="/medals/commit_bronze.png" alt="Bronze" className="w-10 h-10 object-contain drop-shadow-md scale-150 relative z-10" />
-                  </div>
-                  <div className="font-mono text-[11px] font-bold text-[var(--text-muted)] tracking-widest uppercase">7-Day Streak</div>
-                </div>
-                <div className="flex flex-col items-center gap-3">
-                  <div className="w-14 h-14 rounded-full flex items-center justify-center bg-[var(--bg-primary)] border border-[var(--border)] hover:border-[var(--text-primary)] transition-all duration-300 hover:scale-110 relative group">
-                    <div className="absolute inset-0 rounded-full bg-[rgba(255,255,255,0.1)] blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
-                    <img src="/medals/commit_silver.png" alt="Silver" className="w-10 h-10 object-contain drop-shadow-md scale-110 relative z-10" />
-                  </div>
-                  <div className="font-mono text-[11px] font-bold text-[var(--text-muted)] tracking-widest uppercase">21-Day Streak</div>
-                </div>
-                <div className="flex flex-col items-center gap-3">
-                  <div className="w-14 h-14 rounded-full flex items-center justify-center bg-[var(--bg-primary)] border border-[var(--border)] hover:border-[var(--accent-amber)] transition-all duration-300 hover:scale-110 relative group">
-                    <div className="absolute inset-0 rounded-full bg-[var(--accent-amber-dim)] blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
-                    <img src="/medals/commit_gold.png" alt="Gold" className="w-10 h-10 object-contain drop-shadow-md scale-110 relative z-10" />
-                  </div>
-                  <div className="font-mono text-[11px] font-bold text-[var(--text-muted)] tracking-widest uppercase">50-Day Streak</div>
-                </div>
-              </div>
-            </FadeIn>
-          </div>
-        </section>
+        <HorizontalScroller />
 
       </main>
     </div>

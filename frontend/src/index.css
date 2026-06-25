@@ -20,7 +20,7 @@
   --text-faint: #6A677D;
   --bg-selected: rgba(107, 113, 184, 0.15);
   --border-selected: #6B71B8;
-  
+
   /* Section accents */
   --accent-green: #83B892;
   --accent-green-dim: rgba(131, 184, 146, 0.15);
@@ -34,7 +34,7 @@
   --accent-amber-dim: rgba(226, 179, 113, 0.15);
   --accent-red: #D87575;
   --accent-red-dim: rgba(216, 117, 117, 0.15);
-  
+
   /* Language badges */
   --lang-javascript: #f7df1e;
   --lang-typescript: #3178c6;
@@ -54,7 +54,7 @@
   --text-faint: #8B899C;
   --bg-selected: rgba(88, 94, 158, 0.1);
   --border-selected: #585E9E;
-  
+
   /* Section accents */
   --accent-green: #69A076;
   --accent-green-dim: rgba(105, 160, 118, 0.15);
@@ -75,9 +75,6 @@ body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
-  /* Disable pull-to-refresh and horizontal scroll */
-  overscroll-behavior-y: none;
-  overflow-x: hidden;
 }
 
 
@@ -132,6 +129,9 @@ body {
   caret-color: transparent;
 }
 
-input, textarea, [contenteditable="true"], [contenteditable=""] {
+input,
+textarea,
+[contenteditable="true"],
+[contenteditable=""] {
   caret-color: auto;
 }
