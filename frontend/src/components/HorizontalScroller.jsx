@@ -166,7 +166,7 @@ const HorizontalScroller = () => {
 
                 {/* Cinematic Open CTA Area */}
                 <div className="relative flex-shrink-0 flex flex-col items-center justify-center w-[100vw] h-[300px] mt-[65px]">
-                  <h3 className="font-display text-4xl md:text-6xl font-bold text-white text-center mb-10 leading-[1.1] tracking-tight">
+                  <h3 className="font-display text-4xl md:text-6xl font-bold text-[var(--text-primary)] text-center mb-10 leading-[1.1] tracking-tight">
                     Ready to make an <br/>
                     <span className="text-[var(--accent-green)]">impact?</span>
                   </h3>
