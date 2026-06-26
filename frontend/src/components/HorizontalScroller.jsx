@@ -170,11 +170,11 @@ const HorizontalScroller = () => {
                     Ready to make an <br/>
                     <span className="text-[var(--accent-green)]">impact?</span>
                   </h3>
-                  <Link to="/dashboard">
+                  <Link to="/explore">
                     <button className="group relative px-10 py-5 bg-[var(--accent-green)] text-[var(--bg-primary)] text-lg font-bold rounded-full hover:scale-105 transition-all shadow-[0_0_40px_rgba(131,184,146,0.5)] cursor-pointer overflow-hidden">
                       <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
                       <span className="relative flex items-center gap-3">
-                        Explore the Dashboard
+                        Explore Issues
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="group-hover:translate-x-1 transition-transform">
                           <path d="M5 12h14M12 5l7 7-7 7"/>
                         </svg>
