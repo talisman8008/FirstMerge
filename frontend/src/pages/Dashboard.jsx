@@ -578,7 +578,7 @@ export default function Dashboard({ user, signIn, signOut }) {
               ) : (
                 <div className="text-sm text-[var(--text-muted)] py-4 flex flex-col gap-2">
                   <p>No merged PRs yet.</p>
-                  <a href="/explore" className="text-[var(--accent-green)] hover:underline">Use FirstMerge to find your first issue →</a>
+                  <Link to="/explore" className="text-[var(--accent-green)] hover:underline">Use FirstMerge to find your first issue →</Link>
                 </div>
               )}
             </div>
