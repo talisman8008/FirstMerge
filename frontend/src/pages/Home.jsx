@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { useEffect, useRef, useState } from 'react'
-import { motion, useScroll, useTransform, useSpring } from 'framer-motion'
+import { motion, useScroll, useTransform, useSpring, useMotionValue, animate } from 'framer-motion'
 import { Code, BrainCircuit, GitPullRequest, ArrowRight, Activity, Zap } from 'lucide-react'
 import Navbar from '../components/Navbar.jsx'
 
@@ -59,11 +59,27 @@ const SignalRow = ({ name, percent, score, color, delay }) => {
 export default function Home({ user, signIn, signOut }) {
   const navigate = useNavigate()
   const { scrollYProgress } = useScroll()
-  const drawnY = useSpring(useTransform(scrollYProgress, [0, 1], [0, 4500]), {
+  
+  // 1. Base scroll mapping
+  const scrollMappedY = useTransform(scrollYProgress, [0, 1], [0, 4500])
+  
+  // 2. Auto-load animation for the hero section (draws up to the fix/ui node instantly on mount)
+  const loadY = useMotionValue(0)
+  
+  useEffect(() => {
+    animate(loadY, 650, { duration: 2.0, ease: "easeOut" })
+  }, [loadY])
+
+  // 3. Combine them: take whichever is larger (auto-load or user scroll)
+  const activeY = useTransform([loadY, scrollMappedY], ([l, s]) => Math.max(l, s))
+
+  // 4. Apply spring physics for that silky smooth draw
+  const drawnY = useSpring(activeY, {
     stiffness: 100,
     damping: 30,
     restDelta: 0.001
   })
+  
   const heroOpacity = useTransform(scrollYProgress, [0, 0.2], [1, 0])
   const heroY = useTransform(scrollYProgress, [0, 0.2], [0, 100])
 
