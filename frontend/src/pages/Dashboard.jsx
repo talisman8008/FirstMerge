@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { PieChart, Pie, Cell, AreaChart, Area, ResponsiveContainer, Tooltip } from 'recharts'
 import Navbar from '../components/Navbar.jsx'
 import supabase from '../lib/supabase.js'
@@ -360,6 +361,12 @@ export default function Dashboard({ user, signIn, signOut }) {
                 </div>
               </>
             )}
+          </div>
+
+          <div className="w-full mt-4">
+            <Link to="/onboarding" className="w-full flex items-center justify-center gap-2 bg-[var(--bg-card-hover)] hover:bg-[var(--border)] text-[var(--text-primary)] border border-[var(--border)] py-2 rounded-md transition-colors text-sm font-medium">
+              Update Preferences
+            </Link>
           </div>
 
           <div>

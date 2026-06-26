@@ -1,9 +1,10 @@
 import { useEffect } from 'react'
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, useNavigate } from 'react-router-dom'
 import Lenis from 'lenis'
 import 'lenis/dist/lenis.css'
 
 import useAuth from './hooks/useAuth.js'
+import supabase from './lib/supabase.js'
 import Home from './pages/Home.jsx'
 import Explore from './pages/Explore.jsx'
 import IssueDetail from './pages/IssueDetail.jsx'
@@ -33,6 +34,20 @@ export default function App() {
   }, []);
 
   const { user, loading, signIn, signOut } = useAuth()
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (user && !loading && window.location.pathname !== '/onboarding') {
+      // Check if user has a complete profile (e.g., interests are set)
+      supabase.from('users').select('interests').eq('id', user.id).single()
+        .then(({ data }) => {
+          if (!data || !data.interests || data.interests.length === 0) {
+            navigate('/onboarding')
+          }
+        })
+        .catch(err => console.error("Error checking user profile:", err))
+    }
+  }, [user, loading, navigate])
 
   if (loading) {
     return (

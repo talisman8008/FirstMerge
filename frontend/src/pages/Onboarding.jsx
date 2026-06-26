@@ -250,34 +250,44 @@ export default function Onboarding() {
 
   // ── Submit ──
 
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000'
+
   const handleSubmit = async () => {
-    if (!user) return
+    if (!user) {
+      setError('You must be logged in to save your profile.')
+      return
+    }
     setSaving(true)
     setError(null)
 
-    const { error: upsertError } = await supabase
-      .from('users')
-      .upsert(
-        {
-          id: user.id,
-          github_id: user.user_metadata?.provider_id ?? null,
-          username: user.user_metadata?.user_name ?? null,
-          avatar_url: user.user_metadata?.avatar_url ?? null,
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+
+      const res = await fetch(`${BACKEND_URL}/api/user/profile`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session?.access_token}`
+        },
+        body: JSON.stringify({
           languages,
           skill_level: skillLevel,
-          interests,
-        },
-        { onConflict: 'id' }
-      )
+          interests
+        })
+      })
 
-    setSaving(false)
+      if (!res.ok) {
+        const errorData = await res.json()
+        throw new Error(errorData.error || 'Failed to save profile')
+      }
 
-    if (upsertError) {
-      setError('Something went wrong saving your profile. Please try again.')
-      return
+      navigate('/explore')
+    } catch (err) {
+      console.error("Profile save error:", err)
+      setError(`Something went wrong saving your profile: ${err.message}`)
+    } finally {
+      setSaving(false)
     }
-
-    navigate('/explore')
   }
 
   // ── Navigation ──
@@ -294,21 +304,29 @@ export default function Onboarding() {
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (
-    <div className="bg-[var(--bg-primary)] min-h-screen text-[var(--text-primary)] flex flex-col">
-      {/* Nav */}
-      <nav className="border-b border-[var(--border)]">
-        <div className="max-w-[1200px] mx-auto px-6 h-14 flex items-center">
-          <span
-            className="text-sm font-bold tracking-widest text-[var(--accent-green)]"
-            style={{ fontFamily: "'Space Mono', monospace" }}
-          >
-            FIRSTMERGE
+    <div className="min-h-screen bg-[var(--bg-primary)] flex flex-col relative overflow-hidden font-body">
+      
+      {/* Architectural Wallpaper */}
+      <div 
+        className="absolute inset-0 z-0 opacity-30 pointer-events-none"
+        style={{
+          backgroundImage: `repeating-linear-gradient(45deg, var(--border) 0, var(--border) 1px, transparent 1px, transparent 32px)`
+        }}
+      />
+      <div className="absolute inset-0 z-0 bg-gradient-to-b from-transparent via-[var(--bg-primary)]/50 to-[var(--bg-primary)] pointer-events-none" />
+
+      {/* Header */}
+      <nav className="w-full relative z-10 bg-[var(--bg-primary)]/80 backdrop-blur-md border-b border-[var(--border)]">
+        <div className="max-w-[1200px] mx-auto px-6 h-14 flex items-center gap-2">
+          <img src="/logos/firstmerge-icon.svg" alt="FirstMerge" className="w-6 h-6" />
+          <span className="font-sans text-[20px] font-bold text-[var(--text-primary)]">
+            FirstMerge
           </span>
         </div>
       </nav>
 
       {/* Content */}
-      <main className="flex-1 flex items-center justify-center px-6 py-16">
+      <main className="flex-1 flex items-center justify-center px-6 py-16 relative z-10">
         <div className="w-full max-w-[600px] flex flex-col">
           <ProgressBar step={step} />
 

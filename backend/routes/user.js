@@ -119,6 +119,40 @@ router.get('/dashboard', requireAuth, async (req, res) => {
   }
 })
 
+// ── POST /api/user/profile ──────────────────────────────────────────────────
+
+router.post('/profile', requireAuth, async (req, res) => {
+  try {
+    const userId = req.user.id
+    const { languages, skill_level, interests } = req.body
+
+    const { error } = await supabase
+      .from('users')
+      .upsert(
+        {
+          id: userId,
+          github_id: req.user.user_metadata?.provider_id ?? null,
+          username: req.user.user_metadata?.user_name ?? null,
+          avatar_url: req.user.user_metadata?.avatar_url ?? null,
+          languages,
+          skill_level,
+          interests,
+        },
+        { onConflict: 'id' }
+      )
+
+    if (error) {
+      console.error('[user] Profile save failed:', error.message)
+      return res.status(500).json({ error: error.message })
+    }
+
+    return res.json({ success: true })
+  } catch (err) {
+    console.error('[user] POST /profile failed:', err.message)
+    return res.status(500).json({ error: err.message || 'Internal server error' })
+  }
+})
+
 // ── GET /api/user/merged-prs ─────────────────────────────────────────────────
 
 router.get('/merged-prs', requireAuth, async (req, res) => {
