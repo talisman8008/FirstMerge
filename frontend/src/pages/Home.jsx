@@ -14,6 +14,7 @@ import Aurora from '../components/ui/Aurora.jsx'
 import MergeField from '../components/ui/MergeField.jsx'
 import SpotlightCard from '../components/ui/SpotlightCard.jsx'
 import HorizontalScroller from '../components/HorizontalScroller.jsx'
+import Footer from '../components/Footer.jsx'
 
 // Helper for generic fade-in
 const FadeIn = ({ children, delay = 0, className = "" }) => {
@@ -301,6 +302,8 @@ export default function Home({ user, signIn, signOut }) {
         <HorizontalScroller />
 
       </main>
+      
+      <Footer />
     </div>
   )
 }

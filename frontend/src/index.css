@@ -135,3 +135,8 @@ textarea,
 [contenteditable=""] {
   caret-color: auto;
 }
+
+/* Ensure Navbar stays below react-joyride tour */
+body:has(.__floater__) nav {
+  z-index: 0 !important;
+}

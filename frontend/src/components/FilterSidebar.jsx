@@ -110,7 +110,7 @@ export default function FilterSidebar({ filters, onFilterChange }) {
       </div>
 
       {/* Labels filter */}
-      <div className="flex flex-col gap-2">
+      <div id="tour-sidebar-labels" className="flex flex-col gap-2">
         <p className="font-sans text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--text-muted)] mb-[8px]">
           Labels
         </p>
@@ -144,7 +144,7 @@ export default function FilterSidebar({ filters, onFilterChange }) {
       </div>
 
       {/* Skill level */}
-      <div className="flex flex-col gap-2">
+      <div id="tour-skill-level" className="flex flex-col gap-2">
         <p className="font-sans text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--text-muted)] mb-[8px]">
           Skill Level
         </p>
@@ -168,7 +168,7 @@ export default function FilterSidebar({ filters, onFilterChange }) {
       </div>
 
       {/* Min friendliness score */}
-      <div className="flex flex-col gap-3">
+      <div id="tour-min-score" className="flex flex-col gap-3">
         <div className="flex items-center justify-between mb-[8px]">
           <span className="font-sans text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--text-muted)]">
             Min Score

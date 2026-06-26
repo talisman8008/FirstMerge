@@ -147,7 +147,7 @@ export default function IssueCard({ issue, viewMode = 'grid' }) {
         </div>
 
         {/* Right: Score + Actions */}
-        <div className="flex items-center justify-between md:justify-end gap-6 flex-shrink-0 w-full md:w-auto mt-2 md:mt-0 pt-2 md:pt-0 border-t border-[var(--border)] md:border-0">
+        <div className="flex items-center justify-between md:justify-end gap-6 flex-shrink-0 w-full md:w-auto mt-2 md:mt-0 pt-2 md:pt-0 border-t border-[var(--border)] md:border-0 tour-friendliness-score">
           <ScoreRing score={friendliness_score ?? 0} />
           
           <div className="flex items-center gap-3">
@@ -203,7 +203,7 @@ export default function IssueCard({ issue, viewMode = 'grid' }) {
           </div>
         </div>
         
-        <div className="flex-shrink-0 ml-2">
+        <div className="flex-shrink-0 ml-2 tour-friendliness-score">
           <ScoreRing score={friendliness_score ?? 0} />
         </div>
       </div>
@@ -216,7 +216,7 @@ export default function IssueCard({ issue, viewMode = 'grid' }) {
       {/* ROW 3 - bottom of card */}
       <div className="flex justify-between items-end mt-auto pt-4">
         {/* LEFT: Labels & Meta */}
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 tour-issue-labels">
           {interestingLabels.length > 0 && (
             <div className="flex items-center gap-2">
               {interestingLabels.map(lbl => (

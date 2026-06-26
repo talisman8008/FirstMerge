@@ -5,6 +5,80 @@ import FilterSidebar from '../components/FilterSidebar.jsx'
 import IssueCard from '../components/IssueCard.jsx'
 import useAuth from '../hooks/useAuth.js'
 import useIssues from '../hooks/useIssues.js'
+import FTUETour from '../components/FTUETour.jsx'
+
+const exploreTourSteps = [
+  {
+    target: 'body',
+    placement: 'center',
+    content: "Welcome to FirstMerge! Let's take a quick tour of how to find your very first open-source issue.",
+    title: "Find Your First PR",
+    disableBeacon: true,
+  },
+  {
+    target: '#tour-filters',
+    content: "Here you can filter issues by your preferred programming language. We'll automatically find issues that match your stack.",
+    title: "Filter by Tech Stack",
+    placement: 'right',
+    disableBeacon: true,
+  },
+  {
+    target: '#tour-sidebar-labels',
+    content: "Looking for a specific type of task? Click these labels to instantly narrow down your search. 'Good First Issue' is locked because at least one label must be selected at all times.",
+    title: "Filter by Labels",
+    placement: 'right',
+    disableBeacon: true,
+  },
+  {
+    target: '#tour-skill-level',
+    content: "Select your comfort level. If you select 'Beginner', we'll only show issues explicitly labeled for newcomers. If you select 'Advanced', we'll show you more complex bugs.",
+    title: "Skill Level",
+    placement: 'right',
+    disableBeacon: true,
+  },
+  {
+    target: '#tour-min-score',
+    content: "This slider is your best friend. Slide it up to only see issues from maintainers who have a proven track record of being extremely welcoming and responsive.",
+    title: "Minimum Score",
+    placement: 'right',
+    disableBeacon: true,
+  },
+  {
+    target: '#tour-view-toggles',
+    content: "Prefer a compact list or a detailed grid? Switch between views anytime.",
+    title: "Change Your View",
+    placement: 'left',
+    disableBeacon: true,
+  },
+  {
+    target: '#tour-issue-list > div:first-child',
+    content: "Here are your recommended issues! We aggregate them from GitHub and rank them so you don't have to search manually.",
+    title: "Pick an Issue",
+    placement: 'bottom',
+    disableBeacon: true,
+  },
+  {
+    target: '.tour-issue-labels',
+    content: "Look out for labels like 'good first issue' or 'help wanted'. These are specifically curated by maintainers for beginners.",
+    title: "Beginner Friendly Labels",
+    placement: 'bottom',
+    disableBeacon: true,
+  },
+  {
+    target: '.tour-friendliness-score',
+    content: "We analyze the repository's PR history to give you a Friendliness Score. A high score means the maintainer merges PRs quickly and is welcoming to new contributors.",
+    title: "Friendliness Score",
+    placement: 'left',
+    disableBeacon: true,
+  },
+  {
+    target: 'body',
+    content: "Once you find an interesting issue, simply click on it! We'll generate an AI roadmap and a step-by-step guide explaining exactly how to solve it and make your first open source contribution.",
+    title: "Get an AI Roadmap",
+    placement: 'center',
+    disableBeacon: true,
+  }
+];
 
 function debounce(func, wait) {
   let timeout;
@@ -60,6 +134,26 @@ function LoadingSkeleton({ viewMode }) {
 export default function Explore() {
   const { user, signIn, signOut } = useAuth()
   const [viewMode, setViewMode] = useState('grid') // 'grid' or 'list'
+  const [runTour, setRunTour] = useState(false)
+  const [tourKey, setTourKey] = useState(0)
+
+  useEffect(() => {
+    // Only run tour if they haven't seen it yet
+    if (!localStorage.getItem('hasSeenExploreTour')) {
+      localStorage.setItem('hasSeenExploreTour', 'true')
+      // Small delay to let the page load
+      const timer = setTimeout(() => setRunTour(true), 1000)
+      return () => clearTimeout(timer)
+    }
+  }, [])
+
+  const handleJoyrideStateChange = (data) => {
+    const { status } = data;
+    if (status === 'finished' || status === 'skipped') {
+      setRunTour(false);
+      localStorage.setItem('hasSeenExploreTour', 'true');
+    }
+  };
 
   const [sidebarFilters, setSidebarFilters] = useState(() => {
     try {
@@ -155,10 +249,19 @@ export default function Explore() {
   return (
     <div className="bg-[var(--bg-primary)] min-h-screen text-[var(--text-primary)] flex flex-col">
       <Navbar user={user} signIn={signIn} signOut={signOut} />
+      
+      <div className="relative z-[9999999]">
+        <FTUETour 
+          key={tourKey}
+          run={runTour} 
+          steps={exploreTourSteps} 
+          onJoyrideStateChange={handleJoyrideStateChange} 
+        />
+      </div>
 
       <div className="flex flex-1 w-full items-start">
         {/* Left: FilterSidebar (fixed width, full height) */}
-        <div className="w-[280px] flex-shrink-0 hidden md:block sticky top-[64px] h-[calc(100vh-64px)] overflow-y-auto border-r border-[var(--border)] bg-[var(--bg-card)]">
+        <div id="tour-filters" className="w-[280px] flex-shrink-0 hidden md:block sticky top-[64px] h-[calc(100vh-64px)] overflow-y-auto border-r border-[var(--border)] bg-[var(--bg-card)]">
           <FilterSidebar filters={sidebarFilters} onFilterChange={setSidebarFilters} />
         </div>
 
@@ -175,8 +278,33 @@ export default function Explore() {
                 <span className="font-sans text-[13px] text-[var(--text-muted)] hidden sm:inline-block">
                   Sorted by friendliness
                 </span>
+                <button 
+                  onClick={() => {
+                    localStorage.removeItem('hasSeenExploreTour')
+                    setTourKey(Date.now())
+                    setRunTour(true)
+                  }}
+                  className="ml-2 font-sans text-[12px] text-[var(--accent-blue)] hover:underline opacity-80"
+                >
+                  Help?
+                </button>
               </div>
-              <div className="flex items-center gap-2">
+              <div id="tour-view-toggles" className="flex items-center gap-2">
+                {/* Refresh Button */}
+                <button
+                  onClick={() => {
+                    setFetchParams(prev => ({ ...prev, _applied: Date.now() }))
+                  }}
+                  disabled={loading}
+                  className="p-1.5 rounded transition-colors text-[var(--text-muted)] hover:text-[var(--text-primary)] border border-transparent hover:bg-[var(--bg-card-hover)] mr-2"
+                  title="Load fresh issues"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={loading ? "animate-spin" : ""}>
+                    <polyline points="23 4 23 10 17 10"></polyline>
+                    <polyline points="1 20 1 14 7 14"></polyline>
+                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                  </svg>
+                </button>
                 {/* Grid View Button */}
                 <button 
                   onClick={() => setViewMode('grid')}
@@ -259,7 +387,7 @@ export default function Explore() {
             {/* Issue list */}
             {!noLanguagesSelected && !error && (
               <>
-                <div className={viewMode === 'grid' ? "grid grid-cols-1 xl:grid-cols-2 gap-4" : "flex flex-col gap-4"}>
+                <div id="tour-issue-list" className={viewMode === 'grid' ? "grid grid-cols-1 xl:grid-cols-2 gap-4" : "flex flex-col gap-4"}>
                   {issues.map((issue) => (
                     <div 
                       key={`${issue.repo_name}-${issue.number}-${issue.id}`}
