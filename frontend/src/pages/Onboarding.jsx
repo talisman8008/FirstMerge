@@ -283,8 +283,7 @@ export default function Onboarding() {
 
       navigate('/explore')
     } catch (err) {
-      console.error("Profile save error:", err)
-      setError(`Something went wrong saving your profile: ${err.message}`)
+      setError("Uh oh! Our database hamsters tripped on their wheel. Please try saving again!")
     } finally {
       setSaving(false)
     }

@@ -200,7 +200,7 @@ export default function Dashboard({ user, signIn, signOut }) {
           setMergedPrs(mData || { heatmapData: {}, totalMerged: 0, recentMerged: [] })
         }
       } catch (err) {
-        setError(err.message)
+        setError("Our AI took a coffee break and couldn't load your stats. Be right back!")
       } finally {
         setLoading(false)
         setLoadingMergedPrs(false)

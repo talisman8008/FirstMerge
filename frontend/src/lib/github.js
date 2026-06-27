@@ -24,13 +24,12 @@ export async function fetchIssues(language, skillLevel, page, labels = ['good-fi
     
     const res = await fetch(`${BACKEND_URL}/api/issues?${params}`)
     if (!res.ok) {
-      throw new Error(`API returned status: ${res.status}`)
+      throw new Error("Yikes! The GitHub octocats dropped our request. Give it another try!")
     }
     
     const data = await res.json()
     return data
   } catch (err) {
-    console.error('[lib/github.js] fetchIssues failed:', err)
     return { data: [], error: err.message, cached: false }
   }
 }
@@ -44,11 +43,10 @@ export async function fetchRepoScore(owner, repo) {
   try {
     const res = await fetch(`${BACKEND_URL}/api/repos/${owner}/${repo}/score`)
     if (!res.ok) {
-      throw new Error(`API returned status: ${res.status}`)
+      throw new Error("Yikes! The GitHub octocats dropped our request. Give it another try!")
     }
     return await res.json()
   } catch (err) {
-    console.error('[lib/github.js] fetchRepoScore failed:', err)
     return { data: null, error: err.message, cached: false }
   }
 }
@@ -63,11 +61,10 @@ export async function fetchLiveness(owner, repo, issueNumber) {
   try {
     const res = await fetch(`${BACKEND_URL}/api/liveness/${owner}/${repo}/${issueNumber}`)
     if (!res.ok) {
-      throw new Error(`API returned status: ${res.status}`)
+      throw new Error("Yikes! The GitHub octocats dropped our request. Give it another try!")
     }
     return await res.json()
   } catch (err) {
-    console.error('[lib/github.js] fetchLiveness failed:', err)
     return { data: null, error: err.message, cached: false }
   }
 }
