@@ -10,6 +10,7 @@ import userRouter from './routes/user.js';
 import issueDetailsRouter from './routes/issueDetails.js';
 
 const app = express();
+app.set('trust proxy', 1)
 const PORT = process.env.PORT || 3000;
 
 // ── Middleware ────────────────────────────────────────────────────────────────
@@ -26,6 +27,10 @@ app.use('/api/prcheck', express.json({ limit: '500kb' }));
 app.use(express.json({ limit: '10kb' }));
 app.use('/api/prcheck', rateLimit({ windowMs: 15 * 60 * 1000, max: 30 }))
 app.use('/api/issues', rateLimit({ windowMs: 60 * 1000, max: 20 }))
+
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() })
+})
 
 // ── Health check ──────────────────────────────────────────────────────────────
 app.get('/api/health', (_req, res) => {
