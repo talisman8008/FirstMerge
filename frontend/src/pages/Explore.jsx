@@ -155,6 +155,8 @@ export default function Explore() {
     }
   };
 
+  const [showMobileFilters, setShowMobileFilters] = useState(false)
+
   const [sidebarFilters, setSidebarFilters] = useState(() => {
     try {
       const saved = localStorage.getItem('exploreFilters')
@@ -259,7 +261,32 @@ export default function Explore() {
         />
       </div>
 
-      <div className="flex flex-1 w-full items-start">
+      <div className="flex flex-1 w-full items-start relative">
+        {/* Mobile Filter Overlay & Drawer */}
+        {showMobileFilters && (
+          <div className="fixed inset-0 z-50 flex justify-end md:hidden">
+            <div 
+              className="absolute inset-0 bg-[rgba(0,0,0,0.5)]" 
+              onClick={() => setShowMobileFilters(false)} 
+            />
+            <div className="relative h-full w-[280px] bg-[var(--bg-card)] overflow-y-auto p-4 border-l border-[var(--border)] shadow-2xl flex flex-col">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="font-bold text-[var(--text-primary)]">Filters</h2>
+                <button 
+                  onClick={() => setShowMobileFilters(false)}
+                  className="p-1 text-[var(--text-muted)] hover:text-[var(--text-primary)] rounded-md hover:bg-[var(--border)] transition-colors"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
+                </button>
+              </div>
+              <FilterSidebar filters={sidebarFilters} onFilterChange={setSidebarFilters} />
+            </div>
+          </div>
+        )}
+
         {/* Left: FilterSidebar (fixed width, full height) */}
         <div id="tour-filters" className="w-[280px] flex-shrink-0 hidden md:block sticky top-[64px] h-[calc(100vh-64px)] overflow-y-auto border-r border-[var(--border)] bg-[var(--bg-card)]">
           <FilterSidebar filters={sidebarFilters} onFilterChange={setSidebarFilters} />
@@ -269,6 +296,19 @@ export default function Explore() {
         <main className="flex-1 min-w-0 w-full p-6 md:p-8">
           
           <div className="max-w-6xl mx-auto">
+            {/* Mobile Filter Toggle Button */}
+            <div className="md:hidden mb-4">
+              <button
+                onClick={() => setShowMobileFilters(true)}
+                className="w-full bg-[var(--bg-card)] border border-[var(--border)] rounded-md py-2 px-4 flex items-center justify-center gap-2 text-sm font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-card-hover)] transition-colors"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+                </svg>
+                Filters
+              </button>
+            </div>
+
             {/* Top bar */}
             <div className="flex items-center justify-between pb-3 mb-6 border-b border-[var(--border)]">
               <div className="flex items-center gap-4">

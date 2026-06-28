@@ -46,10 +46,10 @@ export default function ShareCardModal({ isOpen, onClose, profile, stats, langua
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="bg-[var(--bg-primary)] border border-[var(--border)] rounded-2xl w-full max-w-3xl overflow-hidden flex flex-col shadow-2xl relative"
+          className="bg-[var(--bg-primary)] border border-[var(--border)] rounded-2xl w-[90vw] md:w-full max-w-3xl max-h-[90vh] overflow-y-auto flex flex-col shadow-2xl relative"
         >
           {/* Header */}
-          <div className="flex justify-between items-center p-4 border-b border-[var(--border)]">
+          <div className="flex justify-between items-center p-4 border-b border-[var(--border)] sticky top-0 bg-[var(--bg-primary)] z-20">
             <h2 className="text-lg font-bold">Share Your Profile</h2>
             <button onClick={onClose} className="p-1 rounded hover:bg-[var(--bg-card-hover)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -65,7 +65,7 @@ export default function ShareCardModal({ isOpen, onClose, profile, stats, langua
             {/* The Actual Shareable Card (Landscape format for social media) */}
             <div 
               ref={cardRef} 
-              className="relative w-full max-w-[800px] aspect-[1.9/1] flex flex-row items-stretch justify-between p-10 rounded-3xl overflow-hidden border shadow-[0_0_80px_rgba(91,79,227,0.15)]"
+              className="relative w-full max-w-[800px] md:aspect-[1.9/1] flex flex-col md:flex-row items-stretch justify-between p-6 md:p-10 rounded-3xl overflow-hidden border shadow-[0_0_80px_rgba(91,79,227,0.15)] gap-8 md:gap-0"
               style={{
                 background: 'linear-gradient(135deg, #120F24 0%, #06050A 100%)',
                 borderColor: 'rgba(91,79,227,0.4)'
@@ -85,7 +85,7 @@ export default function ShareCardModal({ isOpen, onClose, profile, stats, langua
               ></div>
 
               {/* Left Column: Branding & Profile */}
-              <div className="flex flex-col justify-between z-10 w-1/2 pr-6 border-r" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
+              <div className="flex flex-col justify-between z-10 w-full md:w-1/2 md:pr-6 border-b md:border-b-0 md:border-r pb-6 md:pb-0" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
                 {/* Logo / Branding */}
                 <div className="flex items-center gap-2 opacity-90">
                    <img src="/logos/firstmerge-logo-dark-bg.svg" alt="FirstMerge" className="h-7 w-auto" />
@@ -100,7 +100,7 @@ export default function ShareCardModal({ isOpen, onClose, profile, stats, langua
                     style={{ borderColor: '#5B4FE3', backgroundColor: '#16141F' }}
                     crossOrigin="anonymous" 
                   />
-                  <h3 className="text-3xl font-extrabold uppercase tracking-wider mb-1 line-clamp-1" style={{ color: '#ffffff' }}>
+                  <h3 className="text-xl md:text-3xl font-extrabold uppercase tracking-wider mb-1 line-clamp-1" style={{ color: '#ffffff' }}>
                     {profile?.name || profile?.login || 'Developer'}
                   </h3>
                   <p className="text-md font-mono" style={{ color: '#9F97F0' }}>
@@ -110,24 +110,24 @@ export default function ShareCardModal({ isOpen, onClose, profile, stats, langua
               </div>
 
               {/* Right Column: Stats Grid & Languages */}
-              <div className="flex flex-col justify-center z-10 w-1/2 pl-10">
+              <div className="flex flex-col justify-center z-10 w-full md:w-1/2 md:pl-10">
                 
                 {/* 2x2 Stats Grid */}
                 <div className="grid grid-cols-2 gap-4 w-full mb-8">
                   <div className="flex flex-col items-start p-4 rounded-xl border backdrop-blur-md" style={{ backgroundColor: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.1)' }}>
-                    <span className="text-3xl font-mono font-bold mb-1 leading-none" style={{ color: '#ffffff' }}>{stats?.mergedPRs || 0}</span>
+                    <span className="text-xl md:text-3xl font-mono font-bold mb-1 leading-none" style={{ color: '#ffffff' }}>{stats?.mergedPRs || 0}</span>
                     <span className="text-[10px] uppercase tracking-widest font-bold mt-1" style={{ color: '#9F97F0' }}>Merged PRs</span>
                   </div>
                   <div className="flex flex-col items-start p-4 rounded-xl border backdrop-blur-md" style={{ backgroundColor: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.1)' }}>
-                    <span className="text-3xl font-mono font-bold mb-1 leading-none" style={{ color: '#ffffff' }}>{stats?.openPRs || 0}</span>
+                    <span className="text-xl md:text-3xl font-mono font-bold mb-1 leading-none" style={{ color: '#ffffff' }}>{stats?.openPRs || 0}</span>
                     <span className="text-[10px] uppercase tracking-widest font-bold mt-1" style={{ color: '#9CA3AF' }}>Open PRs</span>
                   </div>
                   <div className="flex flex-col items-start p-4 rounded-xl border backdrop-blur-md" style={{ backgroundColor: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.1)' }}>
-                    <span className="text-3xl font-mono font-bold mb-1 leading-none" style={{ color: '#ffffff' }}>{stats?.commits || 0}</span>
+                    <span className="text-xl md:text-3xl font-mono font-bold mb-1 leading-none" style={{ color: '#ffffff' }}>{stats?.commits || 0}</span>
                     <span className="text-[10px] uppercase tracking-widest font-bold mt-1" style={{ color: '#9CA3AF' }}>Total Commits</span>
                   </div>
                   <div className="flex flex-col items-start p-4 rounded-xl border backdrop-blur-md" style={{ backgroundColor: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.1)' }}>
-                    <span className="text-3xl font-mono font-bold mb-1 leading-none" style={{ color: '#ffffff' }}>{stats?.issues || 0}</span>
+                    <span className="text-xl md:text-3xl font-mono font-bold mb-1 leading-none" style={{ color: '#ffffff' }}>{stats?.issues || 0}</span>
                     <span className="text-[10px] uppercase tracking-widest font-bold mt-1" style={{ color: '#9CA3AF' }}>Issues Closed</span>
                   </div>
                 </div>
@@ -151,8 +151,8 @@ export default function ShareCardModal({ isOpen, onClose, profile, stats, langua
           </div>
 
           {/* Footer actions */}
-          <div className="p-4 border-t border-[var(--border)] flex justify-between items-center bg-[var(--bg-card)]">
-            <div className="flex gap-2">
+          <div className="p-4 border-t border-[var(--border)] flex flex-col md:flex-row justify-between items-center bg-[var(--bg-card)] gap-4 md:gap-0 sticky bottom-0 z-20">
+            <div className="flex gap-2 w-full md:w-auto justify-center md:justify-start">
               <button 
                 onClick={() => window.open(`https://twitter.com/intent/tweet?text=Check out my open-source stats on FirstMerge! 🚀&url=https://www.firstmerge.app`, '_blank')} 
                 className="p-2 rounded-md hover:bg-[var(--bg-card-hover)] text-[var(--text-muted)] hover:text-white transition-colors" 
@@ -196,17 +196,17 @@ export default function ShareCardModal({ isOpen, onClose, profile, stats, langua
               </button>
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
               <button
                 onClick={onClose}
-                className="px-4 py-2 rounded-md font-medium text-sm border border-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card-hover)] transition-colors"
+                className="w-full sm:w-auto px-4 py-2 rounded-md font-medium text-sm border border-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card-hover)] transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleDownload}
                 disabled={isDownloading}
-                className="px-6 py-2 rounded-md font-semibold text-sm bg-[#5B4FE3] hover:bg-[#473CC4] text-white transition-colors flex items-center gap-2 disabled:opacity-50"
+                className="w-full sm:w-auto px-6 py-2 rounded-md font-semibold text-sm bg-[#5B4FE3] hover:bg-[#473CC4] text-white transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 {isDownloading ? (
                   <>

@@ -761,7 +761,16 @@ export default function Dashboard({ user, signIn, signOut }) {
                 </div>
               ))}
               {displayedIssues?.length === 0 && (
-                <p className="text-sm text-[var(--text-muted)] py-4 text-center">No repos to show.</p>
+                <div className="flex flex-col items-center justify-center py-6 text-center">
+                  <p className="text-sm text-[var(--text-muted)] mb-2">
+                    {activeTab === 'Saved' ? 'No saved issues yet.' : 'No repos to show.'}
+                  </p>
+                  {activeTab === 'Saved' && (
+                    <Link to="/explore" className="text-sm font-semibold text-[var(--accent-green)] hover:underline">
+                      Find your first issue &rarr;
+                    </Link>
+                  )}
+                </div>
               )}
             </div>
           </div>
