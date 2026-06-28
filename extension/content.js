@@ -36,29 +36,9 @@ function createFirstMergeBanner() {
       banner.style.position = 'relative';
       const ftue = document.createElement('div');
       ftue.id = 'fm-extension-ftue';
-      ftue.style.cssText = `
-        position: absolute;
-        top: -15px;
-        right: -10px;
-        transform: translateY(-100%);
-        background-color: #6B71B8;
-        color: white;
-        padding: 12px 16px;
-        border-radius: 8px;
-        font-family: 'DM Sans', -apple-system, sans-serif;
-        font-size: 13px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        z-index: 10000;
-        width: 280px;
-        border: 1px solid rgba(255,255,255,0.2);
-      `;
+      ftue.style.cssText = 'position: absolute; top: -15px; right: -10px; transform: translateY(-100%); background-color: #6B71B8; color: white; padding: 12px 16px; border-radius: 8px; font-family: sans-serif; font-size: 13px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 10000; width: 280px; border: 1px solid rgba(255,255,255,0.2);';
 
-      ftue.innerHTML = \`
-        <div style="font-weight: bold; margin-bottom: 6px; font-size: 14px;">FirstMerge Auto-Analysis ✨</div>
-        <div style="margin-bottom: 12px; line-height: 1.4;">We will automatically analyze your code here before you submit to ensure it's high quality and linked to an issue.</div>
-        <button id="fm-ftue-dismiss" style="background: rgba(0,0,0,0.2); border: none; color: white; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; transition: background 0.2s;" onmouseover="this.style.background='rgba(0,0,0,0.4)'" onmouseout="this.style.background='rgba(0,0,0,0.2)'">Got it!</button>
-        <div style="position: absolute; bottom: -6px; right: 24px; width: 12px; height: 12px; background: #6B71B8; transform: rotate(45deg); border-right: 1px solid rgba(255,255,255,0.2); border-bottom: 1px solid rgba(255,255,255,0.2);"></div>
-      \`;
+      ftue.innerHTML = '<div style="font-weight: bold; margin-bottom: 6px; font-size: 14px;">FirstMerge Auto-Analysis </div><div style="margin-bottom: 12px; line-height: 1.4;">We will automatically analyze your code here before you submit to ensure it is high quality and linked to an issue.</div><button id="fm-ftue-dismiss" style="background: rgba(0,0,0,0.2); border: none; color: white; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; transition: background 0.2s;">Got it!</button><div style="position: absolute; bottom: -6px; right: 24px; width: 12px; height: 12px; background: #6B71B8; transform: rotate(45deg); border-right: 1px solid rgba(255,255,255,0.2); border-bottom: 1px solid rgba(255,255,255,0.2);"></div>';
       
       banner.appendChild(ftue);
 
@@ -277,20 +257,20 @@ async function analyzePRAutomatically() {
 }
 
 function initAutoAnalyzer() {
-  analyzePRAutomatically();
+  // Run on initial load
+  if (window.location.href.includes('/compare/')) {
+    analyzePRAutomatically();
+  }
 
-  // Handle GitHub's SPA navigation (Turbo/pjax)
-  let lastUrl = location.href; 
+  // Handle GitHub's SPA navigation and dynamic DOM rendering
   new MutationObserver(() => {
-    const currentUrl = location.href;
-    if (currentUrl !== lastUrl) {
-      lastUrl = currentUrl;
-      if (currentUrl.includes('/compare/')) {
-        setTimeout(analyzePRAutomatically, 1000);
-      }
+    if (window.location.href.includes('/compare/')) {
+      // It's safe to call this frequently because analyzePRAutomatically 
+      // checks if the banner already exists before injecting.
+      analyzePRAutomatically();
     }
   }).observe(document.body, { childList: true, subtree: true });
 }
 
-// Wait for GitHub's DOM to be ready
-setTimeout(initAutoAnalyzer, 1000);
+// Start observing immediately
+initAutoAnalyzer();
