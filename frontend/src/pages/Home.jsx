@@ -40,7 +40,7 @@ const SignalRow = ({ name, percent, score, color, delay }) => {
       viewport={{ once: true }}
       transition={{ duration: 0.5, delay }}
     >
-      <div className="w-[180px] md:w-[280px] font-mono text-[12px] md:text-[14px] text-[var(--text-primary)] whitespace-nowrap overflow-hidden text-ellipsis">{name}</div>
+      <div className="w-[110px] sm:w-[180px] md:w-[280px] font-mono text-[11px] sm:text-[12px] md:text-[14px] text-[var(--text-primary)] whitespace-nowrap overflow-hidden text-ellipsis">{name}</div>
       <div className="flex-1 h-[2px] bg-[var(--border)] relative overflow-hidden rounded-full">
         <motion.div 
           className="absolute top-0 left-0 h-full"
@@ -62,13 +62,13 @@ export default function Home({ user, signIn, signOut }) {
   const { scrollYProgress } = useScroll()
   
   // 1. Base scroll mapping
-  const scrollMappedY = useTransform(scrollYProgress, [0, 1], [0, 4500])
+  const scrollMappedY = useTransform(scrollYProgress, [0, 1], [0, 6500])
   
   // 2. Auto-load animation for the hero section (draws up to the fix/ui node instantly on mount)
   const loadY = useMotionValue(0)
   
   useEffect(() => {
-    animate(loadY, 650, { duration: 2.0, ease: "easeOut" })
+    animate(loadY, 1500, { duration: 2.5, ease: "easeOut" })
   }, [loadY])
 
   // 3. Combine them: take whichever is larger (auto-load or user scroll)
@@ -299,6 +299,115 @@ export default function Home({ user, signIn, signOut }) {
               </motion.div>
             </SpotlightCard>
 
+          </div>
+        </section>
+
+        {/* PRICING SECTION */}
+        <section id="pricing" className="relative z-10 w-full max-w-[1200px] mx-auto px-6 pb-[120px]">
+          <div className="text-center mb-16 relative z-10">
+            <FadeIn>
+              <h2 className="font-display text-[40px] md:text-[56px] font-bold text-[var(--text-primary)] leading-[1.1] tracking-[-0.02em]">
+                Simple, transparent <span className="text-[var(--accent-blue)]">pricing.</span>
+              </h2>
+            </FadeIn>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10 w-full">
+            {/* Tier 1: Free */}
+            <SpotlightCard className="p-8 flex flex-col min-h-[450px]">
+              <h3 className="font-display text-[24px] font-bold text-[var(--text-primary)] mb-2">Contributor</h3>
+              <div className="font-display text-[48px] font-bold text-[var(--text-primary)] mb-4">₹0<span className="text-[16px] text-[var(--text-muted)] font-normal tracking-normal">/mo</span></div>
+              <p className="text-[16px] text-[var(--text-muted)] mb-8 flex-1">
+                For students and beginners to land their first PR.
+              </p>
+              <ul className="space-y-4 mb-8 text-[14px] text-[var(--text-primary)] font-medium">
+                <li className="flex items-center gap-3"><Code size={16} className="text-[var(--accent-green)]" /> Issue Discovery Feed</li>
+                <li className="flex items-center gap-3"><Code size={16} className="text-[var(--accent-green)]" /> 5 AI PR checks per month</li>
+                <li className="flex items-center gap-3"><Code size={16} className="text-[var(--accent-green)]" /> Contribution Dashboard</li>
+                <li className="flex items-center gap-3"><Code size={16} className="text-[var(--accent-green)]" /> Chrome Extension</li>
+                <li className="flex items-center gap-3"><Code size={16} className="text-[var(--accent-green)]" /> Shareable First PR card</li>
+              </ul>
+              <button className="w-full py-3 rounded-lg border border-[var(--border)] bg-[var(--bg-primary)] hover:bg-[var(--bg-card-hover)] text-[var(--text-primary)] font-bold transition-all" onClick={signIn}>Get Started</button>
+            </SpotlightCard>
+
+            {/* Tier 2: Pro */}
+            <SpotlightCard spotlightColor="var(--accent-purple-dim)" className="p-8 flex flex-col min-h-[450px] border-[var(--accent-purple)] relative">
+              <div className="absolute top-0 right-0 bg-[var(--accent-purple)] text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg rounded-tr-xl uppercase tracking-widest">First 100 Free</div>
+              <h3 className="font-display text-[24px] font-bold text-[var(--text-primary)] mb-2">Pro</h3>
+              <div className="font-display text-[48px] font-bold text-[var(--text-primary)] mb-4 flex items-baseline">
+                <span className="line-through text-[var(--text-faint)] text-[32px] mr-3 decoration-[var(--accent-purple)]">₹199</span>₹0<span className="text-[16px] text-[var(--text-muted)] font-normal tracking-normal">/mo</span>
+              </div>
+              <p className="text-[16px] text-[var(--text-muted)] mb-8 flex-1">
+                For serious contributors building a placement portfolio. <br/><span className="text-[var(--accent-purple)] font-medium text-[13px] mt-2 block">Early adopter offer applied.</span>
+              </p>
+              <ul className="space-y-4 mb-8 text-[14px] text-[var(--text-primary)] font-medium">
+                <li className="flex items-center gap-3"><Zap size={16} className="text-[var(--accent-purple)]" /> Unlimited AI PR checks</li>
+                <li className="flex items-center gap-3"><Zap size={16} className="text-[var(--accent-purple)]" /> Instant priority scoring</li>
+                <li className="flex items-center gap-3"><Zap size={16} className="text-[var(--accent-purple)]" /> Extended analytics</li>
+                <li className="flex items-center gap-3"><Zap size={16} className="text-[var(--accent-purple)]" /> PDF Portfolio Export</li>
+              </ul>
+              <button className="w-full py-3 rounded-lg bg-[var(--accent-purple)] hover:bg-[var(--accent-purple)]/90 text-white font-bold transition-all" onClick={signIn}>Claim Free Pro</button>
+            </SpotlightCard>
+
+            {/* Tier 3: Repo Certification */}
+            <SpotlightCard spotlightColor="var(--accent-blue-dim)" className="p-8 flex flex-col min-h-[450px]">
+              <h3 className="font-display text-[24px] font-bold text-[var(--text-primary)] mb-2">Enterprise</h3>
+              <div className="font-display text-[48px] font-bold text-[var(--text-primary)] mb-4">₹5k<span className="text-[16px] text-[var(--text-muted)] font-normal tracking-normal">/mo</span></div>
+              <p className="text-[16px] text-[var(--text-muted)] mb-8 flex-1">
+                For open source projects attracting top contributors.
+              </p>
+              <ul className="space-y-4 mb-8 text-[14px] text-[var(--text-primary)] font-medium">
+                <li className="flex items-center gap-3"><Activity size={16} className="text-[var(--accent-blue)]" /> Certified Badge on Feed</li>
+                <li className="flex items-center gap-3"><Activity size={16} className="text-[var(--accent-blue)]" /> Contributor Pipeline Dashboard</li>
+                <li className="flex items-center gap-3"><Activity size={16} className="text-[var(--accent-blue)]" /> Dedicated listing page</li>
+                <li className="flex items-center gap-3"><Activity size={16} className="text-[var(--accent-blue)]" /> Custom CONTRIBUTING.md analysis</li>
+              </ul>
+              <button className="w-full py-3 rounded-lg border border-[var(--border)] bg-[var(--bg-primary)] hover:bg-[var(--bg-card-hover)] text-[var(--text-primary)] font-bold transition-all">Contact Sales</button>
+            </SpotlightCard>
+          </div>
+
+          <div className="mt-16 py-6 border-y border-[var(--border)] bg-[var(--bg-primary)]/40 flex flex-col md:flex-row items-center justify-center gap-6 w-full">
+            <span className="text-[15px] text-[var(--text-primary)] font-medium">
+              Hiring engineers or want quality contributors to your repo?
+            </span>
+            <div className="flex items-center gap-6 text-[14px] font-bold">
+              <a href="#" className="text-[#5B4FE3] hover:text-[#9F97F0] transition-colors inline-flex items-center gap-1">
+                Get Repo Certified &rarr;
+              </a>
+              <a href="mailto:firstmerge@gmail.com" className="text-[#5B4FE3] hover:text-[#9F97F0] transition-colors inline-flex items-center gap-1">
+                Contact Us &rarr;
+              </a>
+            </div>
+          </div>
+
+          <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10 w-full opacity-60 hover:opacity-80 transition-opacity grayscale-[30%]">
+            {/* Coming Soon: Mentor Program */}
+            <SpotlightCard className="p-8 flex flex-col min-h-[350px] border-dashed border-[var(--border)] relative overflow-hidden">
+              <div className="w-fit mb-4 bg-amber-500/10 text-amber-500 border border-amber-500/20 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">Coming Soon</div>
+              <h3 className="font-display text-[24px] font-bold text-[var(--text-primary)] mb-2">Mentor Program</h3>
+              <div className="font-display text-[32px] font-bold text-[var(--text-primary)] mb-4">₹99<span className="text-[16px] text-[var(--text-muted)] font-normal tracking-normal">/student/mo</span></div>
+              <p className="text-[15px] text-[var(--text-muted)] mb-8 flex-1">
+                Senior developers guide cohorts of 10 students. Mentors earn 70% of fees.
+              </p>
+              <ul className="space-y-4 mb-2 text-[14px] text-[var(--text-primary)] font-medium">
+                <li className="flex items-center gap-3"><Code size={16} className="text-[var(--text-muted)]" /> Verified Mentor Badge</li>
+                <li className="flex items-center gap-3"><Code size={16} className="text-[var(--text-muted)]" /> 30% platform cut goes to FirstMerge</li>
+              </ul>
+            </SpotlightCard>
+
+            {/* Coming Soon: Recruiter Portal */}
+            <SpotlightCard className="p-8 flex flex-col min-h-[350px] border-dashed border-[var(--border)] relative overflow-hidden">
+              <div className="w-fit mb-4 bg-amber-500/10 text-amber-500 border border-amber-500/20 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">Coming Soon</div>
+              <h3 className="font-display text-[24px] font-bold text-[var(--text-primary)] mb-2">Recruiter Portal</h3>
+              <div className="font-display text-[32px] font-bold text-[var(--text-primary)] mb-4">$99<span className="text-[16px] text-[var(--text-muted)] font-normal tracking-normal">/month</span></div>
+              <p className="text-[15px] text-[var(--text-muted)] mb-8 flex-1">
+                Search verified contributors by language, PR count, and Friendliness Score.
+              </p>
+              <ul className="space-y-4 mb-2 text-[14px] text-[var(--text-primary)] font-medium">
+                <li className="flex items-center gap-3"><Activity size={16} className="text-[var(--text-muted)]" /> Merge Credits outreach system</li>
+                <li className="flex items-center gap-3"><Activity size={16} className="text-[var(--text-muted)]" /> Verified skill badges</li>
+              </ul>
+            </SpotlightCard>
           </div>
         </section>
 

@@ -239,6 +239,13 @@ export default function Onboarding() {
       prev.includes(area) ? prev.filter((a) => a !== area) : [...prev, area]
     )
 
+  const handleSkillSelect = (levelId) => {
+    setSkillLevel(levelId)
+    setTimeout(() => {
+      handleNext()
+    }, 300)
+  }
+
   // ── Validation ──
 
   const canAdvance = () => {
@@ -335,7 +342,7 @@ export default function Onboarding() {
               <StepLanguages selected={languages} onToggle={toggleLanguage} />
             )}
             {step === 2 && (
-              <StepExperience selected={skillLevel} onSelect={setSkillLevel} />
+              <StepExperience selected={skillLevel} onSelect={handleSkillSelect} />
             )}
             {step === 3 && (
               <StepInterests selected={interests} onToggle={toggleInterest} />

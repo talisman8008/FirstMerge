@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import Navbar from '../components/Navbar.jsx'
 import supabase from '../lib/supabase.js'
 
@@ -241,6 +242,15 @@ export default function PRCheck({ user, signIn, signOut }) {
   return (
     <div className="bg-[var(--bg-primary)] min-h-screen text-[var(--text-primary)]">
       <Navbar user={user} signIn={signIn} signOut={signOut} />
+
+      <div className="w-full max-w-[1200px] mx-auto px-6 pt-6">
+        <Link 
+          to="/dashboard" 
+          className="inline-flex items-center gap-2 text-[13px] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+        >
+          ← Back to Dashboard
+        </Link>
+      </div>
 
       <div className="w-full max-w-[1200px] mx-auto px-6 py-20 flex flex-col items-center justify-center text-center mt-10">
         <h1 className="text-[40px] md:text-[56px] font-sans font-semibold tracking-tight text-[var(--text-primary)] mb-6">
