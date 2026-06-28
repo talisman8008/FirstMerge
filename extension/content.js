@@ -1,7 +1,7 @@
 // This script runs directly on GitHub Pull Request pages.
 console.log('FirstMerge content script loaded on a Pull Request page.');
 
-const BACKEND_URL = 'https://your-backend.up.railway.app';
+const BACKEND_URL = 'https://mergemate-production-59be.up.railway.app';
 
 function createFirstMergeBanner() {
   const banner = document.createElement('div');
