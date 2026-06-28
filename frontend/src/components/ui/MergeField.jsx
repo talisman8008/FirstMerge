@@ -53,20 +53,20 @@ const CommitNode = ({ commit, drawnY }) => {
 
 export default function MergeField({ drawnY, className = "" }) {
   // Master path progress mapped perfectly to Y coordinates
-  const pathLengthMain = useTransform(drawnY, [0, 2800], [0, 1]);
+  const pathLengthMain = useTransform(drawnY, [0, 5500], [0, 1]);
   // Blue path: cy starts at 200, ends at 1100
   const pathLengthBlue = useTransform(drawnY, [200, 1100], [0, 1]);
   // Green path: cy starts at 400, ends at 800
   const pathLengthGreen = useTransform(drawnY, [400, 800], [0, 1]);
-  // Energy path: cy starts at 1200, ends at 2800
-  const pathLengthEnergy = useTransform(drawnY, [1200, 2800], [0, 1]);
+  // Energy path: cy starts at 1200, ends at 5500
+  const pathLengthEnergy = useTransform(drawnY, [1200, 5500], [0, 1]);
 
-  const pathMain = "M 800 0 L 800.1 2800";
+  const pathMain = "M 800 0 L 800.1 5500";
   const pathBlue = "M 800 200 C 800 250, 950 250, 950 300 L 950 1000 C 950 1050, 800 1050, 800 1100";
   const pathGreen = "M 950 400 C 950 450, 1100 450, 1100 500 L 1100 700 C 1100 750, 950 750, 950 800";
   
   // Wrap around the Bento grid beautifully and merge back into the main trunk
-  const pathEnergy = "M 800 1200 C 800 1300, 500 1300, 500 1400 L 500.1 4500";
+  const pathEnergy = "M 800 1200 C 800 1300, 500 1300, 500 1400 L 500.1 5500";
 
   const commits = [
     // Main Trunk
@@ -95,12 +95,12 @@ export default function MergeField({ drawnY, className = "" }) {
   return (
     <div className={`absolute top-0 w-full h-full z-0 pointer-events-none flex justify-center overflow-hidden ${className}`}>
       <svg
-        className="absolute w-[1200px] h-[4500px] top-[0px]"
-        viewBox="0 0 1200 4500"
+        className="absolute w-[1200px] h-[5500px] top-[0px]"
+        viewBox="0 0 1200 5500"
         fill="none"
       >
         <defs>
-          <linearGradient id="purpleGrad" gradientUnits="userSpaceOnUse" x1="800" y1="0" x2="800" y2="4500">
+          <linearGradient id="purpleGrad" gradientUnits="userSpaceOnUse" x1="800" y1="0" x2="800" y2="5500">
             <stop offset="0%" stopColor="#8A2BE2" />
             <stop offset="100%" stopColor="#4A43A6" />
           </linearGradient>
@@ -118,7 +118,7 @@ export default function MergeField({ drawnY, className = "" }) {
             <stop offset="100%" stopColor="#83B892" />
           </linearGradient>
 
-          <filter id="premiumGlow" filterUnits="userSpaceOnUse" x="-500" y="-500" width="2200" height="3600">
+          <filter id="premiumGlow" filterUnits="userSpaceOnUse" x="-500" y="-500" width="2200" height="6500">
             <feGaussianBlur stdDeviation="8" result="blur" />
             <feComposite in="SourceGraphic" in2="blur" operator="over" />
           </filter>

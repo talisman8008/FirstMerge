@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { PieChart, Pie, Cell, AreaChart, Area, ResponsiveContainer, Tooltip } from 'recharts'
 import Navbar from '../components/Navbar.jsx'
 import supabase from '../lib/supabase.js'
+import FTUETour from '../components/FTUETour.jsx'
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000'
 
@@ -84,6 +85,79 @@ const seedProfile = {
   avatar_url: 'https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png'
 };
 
+const dashboardTourSteps = [
+  {
+    target: 'body',
+    placement: 'center',
+    content: "Most platforms track how many Pull Requests you open, which leads to spam. FirstMerge focuses purely on quality and merged code.",
+    title: "Welcome to your Dashboard",
+    disableBeacon: true,
+  },
+  {
+    target: '#tour-heatmap',
+    content: "Take a look at the heatmap. Notice that we don't just track your activity; we track your Merge Rate. A high merge rate means you are submitting code that maintainers actually want.",
+    title: "The Merge Rate Heatmap",
+    placement: 'top',
+    disableBeacon: true,
+  },
+  {
+    target: '#tour-split',
+    content: "This chart breaks down your open-source journey into Commits, PRs, and Issues. It helps you see where you're making the most impact.",
+    title: "Your Contribution Split",
+    placement: 'left',
+    disableBeacon: true,
+  },
+  {
+    target: '#tour-milestones',
+    content: "As you complete contributions, you'll unlock milestone cards here. Keep an eye out for your 'First Merged PR' card—it's generated automatically and is perfect for sharing on LinkedIn or Twitter!",
+    title: "Milestones & Streaks",
+    placement: 'right',
+    disableBeacon: true,
+  },
+  {
+    target: '#tour-community-stats',
+    content: "Here is your overall impact across the open-source ecosystem at a glance.",
+    title: "Community Stats",
+    placement: 'right',
+    disableBeacon: true,
+  },
+  {
+    target: '#tour-languages',
+    content: "We track the languages you contribute to the most, helping you showcase your technical expertise to the world.",
+    title: "Your Top Languages",
+    placement: 'right',
+    disableBeacon: true,
+  },
+  {
+    target: '#tour-issue-types',
+    content: "See what kind of issues you've been solving. As you tackle more complex problems, this breakdown will evolve.",
+    title: "Issue Types",
+    placement: 'right',
+    disableBeacon: true,
+  },
+  {
+    target: '#tour-top-repos',
+    content: "Your Top Repositories highlights the projects where you've had the most significant impact. Maintainers love consistent contributors!",
+    title: "Top Repositories",
+    placement: 'left',
+    disableBeacon: true,
+  },
+  {
+    target: '#tour-recent-merged',
+    content: "Your Recent Merged PRs provide a quick reference to your latest successful contributions. Click them to view your code on GitHub.",
+    title: "Recent Merged PRs",
+    placement: 'left',
+    disableBeacon: true,
+  },
+  {
+    target: '#tour-saved-issues',
+    content: "Below your stats, you'll see a list of issues you've saved and PRs you've opened. This is your command center to jump right back into the code you're currently working on.",
+    title: "Your Saved & Active Issues",
+    placement: 'top',
+    disableBeacon: true,
+  }
+];
+
 const seedDashData = {
   stats: {
     totalIssuesClosed: 42,
@@ -127,9 +201,29 @@ export default function Dashboard({ user, signIn, signOut }) {
   const [loadingMergedPrs, setLoadingMergedPrs] = useState(true)
   const [error, setError] = useState(null)
   const [activeTab, setActiveTab] = useState('Saved')
+  const [runTour, setRunTour] = useState(false)
+  const [tourKey, setTourKey] = useState(0)
+
+  useEffect(() => {
+    // Only run tour if they haven't seen it yet
+    if (!localStorage.getItem('hasSeenDashboardTour')) {
+      localStorage.setItem('hasSeenDashboardTour', 'true')
+      // Small delay to let the page load
+      const timer = setTimeout(() => setRunTour(true), 1000)
+      return () => clearTimeout(timer)
+    }
+  }, [])
+
+  const handleJoyrideStateChange = (data) => {
+    const { status } = data;
+    if (status === 'finished' || status === 'skipped') {
+      setRunTour(false);
+      localStorage.setItem('hasSeenDashboardTour', 'true');
+    }
+  };
   
   const [isDemoMode, setIsDemoMode] = useState(
-    localStorage.getItem('dashboardMode') === 'demo'
+    localStorage.getItem('dashboardMode') !== 'real'
   )
 
   const toggleDemoMode = async () => {
@@ -309,6 +403,15 @@ export default function Dashboard({ user, signIn, signOut }) {
         <Navbar user={user} signIn={signIn} signOut={signOut} />
       </div>
 
+      <div className="relative z-[9999999]">
+        <FTUETour 
+          key={tourKey}
+          run={runTour} 
+          steps={dashboardTourSteps} 
+          onJoyrideStateChange={handleJoyrideStateChange} 
+        />
+      </div>
+
       {isDemoMode && (
         <div className="w-full py-1.5 text-center" style={{ backgroundColor: 'rgba(245,158,11,0.1)', borderBottom: '1px solid var(--accent-amber)', color: 'var(--accent-amber)', fontSize: '12px' }}>
           Viewing demo data — not your real stats
@@ -317,7 +420,17 @@ export default function Dashboard({ user, signIn, signOut }) {
 
       {error && <div className="p-4 text-red-600 text-center">{error}</div>}
 
-      <div className="max-w-[2880px] mx-auto px-8 pt-6 pb-2 flex justify-end">
+      <div className="max-w-[2880px] mx-auto px-8 pt-6 pb-2 flex justify-end items-center gap-3">
+        <button 
+          onClick={() => {
+            localStorage.removeItem('hasSeenDashboardTour')
+            setTourKey(Date.now())
+            setRunTour(true)
+          }}
+          className="px-3 py-1.5 rounded-md border border-transparent text-[var(--accent-blue)] hover:bg-[var(--bg-card-hover)] transition-colors" style={{ fontFamily: 'DM Sans', fontSize: '12px' }}
+        >
+          Help?
+        </button>
         {!isDemoMode ? (
           <button onClick={toggleDemoMode} className="px-3 py-1.5 rounded-md border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors" style={{ fontFamily: 'DM Sans', fontSize: '12px' }}>
             View Demo
@@ -369,7 +482,7 @@ export default function Dashboard({ user, signIn, signOut }) {
             </Link>
           </div>
 
-          <div>
+          <div id="tour-milestones">
             <h3 className="text-lg font-bold text-[var(--text-muted)]">Milestones Rewards:</h3>
             <div className="border border-[var(--border)] rounded-md mt-2 p-5 grid grid-cols-3 gap-y-6 gap-x-2" style={{ backgroundColor: 'var(--bg-card)' }}>
               {milestones.map((m, idx) => {
@@ -407,7 +520,7 @@ export default function Dashboard({ user, signIn, signOut }) {
             </div>
           </div>
 
-          <div className="border-t border-[var(--border)] pt-6">
+          <div id="tour-community-stats" className="border-t border-[var(--border)] pt-6">
             <h3 className="text-lg font-bold text-[var(--text-muted)] mb-4">Community Stats</h3>
             <div className="space-y-4">
               <p className="flex justify-between items-center text-sm">
@@ -422,7 +535,7 @@ export default function Dashboard({ user, signIn, signOut }) {
             </div>
           </div>
 
-          <div className="border-t border-[var(--border)] pt-6">
+          <div id="tour-languages" className="border-t border-[var(--border)] pt-6">
             <h3 className="text-lg font-bold text-[var(--text-muted)] mb-4">Languages</h3>
             <div className="space-y-3">
               {languages.slice(0, 3).map((lang, idx) => (
@@ -437,7 +550,7 @@ export default function Dashboard({ user, signIn, signOut }) {
             </div>
           </div>
 
-          <div className="border-t border-[var(--border)] pt-6">
+          <div id="tour-issue-types" className="border-t border-[var(--border)] pt-6">
             <h3 className="text-lg font-bold text-[var(--text-muted)] mb-4">Type of Issue solved</h3>
             <div className="space-y-3">
               <div className="flex items-center gap-2">
@@ -458,7 +571,7 @@ export default function Dashboard({ user, signIn, signOut }) {
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* User Stats Box (now Contribution Split) */}
-            <div className="border border-[var(--border)] rounded-xl p-6 min-h-[200px] flex flex-col" style={{ backgroundColor: 'var(--bg-card)' }}>
+            <div id="tour-split" className="border border-[var(--border)] rounded-xl p-6 min-h-[200px] flex flex-col" style={{ backgroundColor: 'var(--bg-card)' }}>
               <h3 className="text-xl font-bold text-[var(--text-muted)] mb-2">Contribution Split</h3>
               <div className="flex flex-row items-center flex-1 w-full">
                 {/* Chart Container (Left) */}
@@ -504,7 +617,7 @@ export default function Dashboard({ user, signIn, signOut }) {
             </div>
 
             {/* Top Contribution */}
-            <div className="border border-[var(--border)] rounded-xl p-6 min-h-[200px]" style={{ backgroundColor: 'var(--bg-card)' }}>
+            <div id="tour-top-repos" className="border border-[var(--border)] rounded-xl p-6 min-h-[200px]" style={{ backgroundColor: 'var(--bg-card)' }}>
               <h3 className="text-xl font-bold text-[var(--text-muted)] mb-4">Top Repositories</h3>
               <div className="space-y-3">
                 {repos.length > 0 ? (
@@ -533,7 +646,7 @@ export default function Dashboard({ user, signIn, signOut }) {
           </div>
 
           {/* Heatmap */}
-          <div className="border border-[var(--border)] rounded-xl pt-6 pb-6 px-4 md:px-8 flex flex-col" style={{ backgroundColor: 'var(--bg-card)' }}>
+          <div id="tour-heatmap" className="border border-[var(--border)] rounded-xl pt-6 pb-6 px-4 md:px-8 flex flex-col" style={{ backgroundColor: 'var(--bg-card)' }}>
             {loadingMergedPrs && !isDemoMode ? (
               <div className="h-[200px] w-full animate-pulse bg-[var(--border)] rounded-md"></div>
             ) : (
@@ -547,7 +660,7 @@ export default function Dashboard({ user, signIn, signOut }) {
           </div>
 
           {/* Recent Merged PRs */}
-          <div className="border border-[var(--border)] rounded-xl p-6" style={{ backgroundColor: 'var(--bg-card)' }}>
+          <div id="tour-recent-merged" className="border border-[var(--border)] rounded-xl p-6" style={{ backgroundColor: 'var(--bg-card)' }}>
             <h3 className="text-xl font-bold text-[var(--text-muted)] mb-4">Recent Merged PRs</h3>
             <div className="space-y-3">
               {loadingMergedPrs ? (
@@ -585,7 +698,7 @@ export default function Dashboard({ user, signIn, signOut }) {
           </div>
 
           {/* Bottom Tabs */}
-          <div className="border border-[var(--border)] rounded-xl p-6" style={{ backgroundColor: 'var(--bg-card)' }}>
+          <div id="tour-saved-issues" className="border border-[var(--border)] rounded-xl p-6" style={{ backgroundColor: 'var(--bg-card)' }}>
             <div className="flex gap-8 border-b border-[var(--border)] pb-4 mb-4">
               {['Saved', 'Open PR', 'Closed PRs'].map(tab => (
                 <button 

@@ -90,6 +90,9 @@ const HorizontalScroller = () => {
   const titleOpacity = useTransform(smooth, [0.65, 0.75], [1, 0]);
   const titleY = useTransform(smooth, [0.65, 0.75], [0, -50]);
 
+  // Animate the purple line drawing in as you start scrolling
+  const purplePathLength = useTransform(smooth, [0, 0.2], [0, 1]);
+
   return (
     <section ref={sectionRef} className="relative z-20" style={{ height: '300vh' }}>
       <div className="sticky top-0 left-0 w-full h-screen overflow-hidden flex flex-col justify-center items-center z-30">
@@ -107,10 +110,17 @@ const HorizontalScroller = () => {
             <motion.div className="absolute inset-0 flex justify-center pointer-events-none z-0">
               <svg width="1200" height="600" viewBox="0 0 1200 600" className="overflow-visible">
                 {/* Overlapping green trunk from MergeField coming straight down slightly left of center */}
-                <path d="M 500 -1000 L 500 50" fill="none" stroke="url(#energyGradTrack)" strokeWidth="3" strokeLinecap="round" filter="url(#premiumGlowScroller)" />
+                <path d="M 500 -1000 L 500 50" fill="none" stroke="#83B892" strokeWidth="3" strokeLinecap="round" filter="url(#premiumGlowScroller)" />
                 
                 {/* Overlapping purple trunk from MergeField curving from right into the merge node */}
-                <path d="M 800 -1000 L 800 0 C 800 50, 500 50, 500 50" fill="none" stroke="#6834B8" strokeWidth="3" strokeLinecap="round" filter="url(#premiumGlowScroller)" />
+                <path 
+                  d="M 800 -1000 L 800 0 C 800 50, 500 50, 500 50" 
+                  fill="none" 
+                  stroke="#6834B8" 
+                  strokeWidth="3" 
+                  strokeLinecap="round" 
+                  filter="url(#premiumGlowScroller)"
+                />
                 
                 {/* Merge Node perfectly positioned to drop between words */}
                 <circle cx="500" cy="50" r="14" fill="var(--bg-primary)" stroke="#8A2BE2" strokeWidth="5" />
@@ -124,7 +134,7 @@ const HorizontalScroller = () => {
                      <stop offset="0%" stopColor="#83B892" />
                      <stop offset="100%" stopColor="#DE8A75" />
                   </linearGradient>
-                  
+
                   <filter id="premiumGlowScroller" filterUnits="userSpaceOnUse" x="-500" y="-1200" width="2200" height="2000">
                     <feGaussianBlur stdDeviation="8" result="blur" />
                     <feComposite in="SourceGraphic" in2="blur" operator="over" />

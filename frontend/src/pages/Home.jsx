@@ -62,7 +62,7 @@ export default function Home({ user, signIn, signOut }) {
   const { scrollYProgress } = useScroll()
   
   // 1. Base scroll mapping
-  const scrollMappedY = useTransform(scrollYProgress, [0, 1], [0, 4500])
+  const scrollMappedY = useTransform(scrollYProgress, [0, 1], [0, 6500])
   
   // 2. Auto-load animation for the hero section (draws up to the fix/ui node instantly on mount)
   const loadY = useMotionValue(0)
@@ -299,6 +299,70 @@ export default function Home({ user, signIn, signOut }) {
               </motion.div>
             </SpotlightCard>
 
+          </div>
+        </section>
+
+        {/* PRICING SECTION */}
+        <section id="pricing" className="relative z-10 w-full max-w-[1200px] mx-auto px-6 pb-[120px]">
+          <div className="text-center mb-16 relative z-10">
+            <FadeIn>
+              <h2 className="font-display text-[40px] md:text-[56px] font-bold text-[var(--text-primary)] leading-[1.1] tracking-[-0.02em]">
+                Simple, transparent <span className="text-[var(--accent-blue)]">pricing.</span>
+              </h2>
+            </FadeIn>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10 w-full">
+            {/* Tier 1: Free */}
+            <SpotlightCard className="p-8 flex flex-col min-h-[450px]">
+              <h3 className="font-display text-[24px] font-bold text-[var(--text-primary)] mb-2">Hacker</h3>
+              <div className="font-display text-[48px] font-bold text-[var(--text-primary)] mb-4">₹0<span className="text-[16px] text-[var(--text-muted)] font-normal tracking-normal">/mo</span></div>
+              <p className="text-[16px] text-[var(--text-muted)] mb-8 flex-1">
+                For students and beginners to land their first PR.
+              </p>
+              <ul className="space-y-4 mb-8 text-[14px] text-[var(--text-primary)] font-medium">
+                <li className="flex items-center gap-3"><Code size={16} className="text-[var(--accent-green)]" /> Issue Discovery Feed</li>
+                <li className="flex items-center gap-3"><Code size={16} className="text-[var(--accent-green)]" /> 5 AI PR checks per month</li>
+                <li className="flex items-center gap-3"><Code size={16} className="text-[var(--accent-green)]" /> Contribution Dashboard</li>
+                <li className="flex items-center gap-3"><Code size={16} className="text-[var(--accent-green)]" /> Chrome Extension</li>
+              </ul>
+              <button className="w-full py-3 rounded-lg border border-[var(--border)] bg-[var(--bg-primary)] hover:bg-[var(--bg-card-hover)] text-[var(--text-primary)] font-bold transition-all" onClick={signIn}>Get Started</button>
+            </SpotlightCard>
+
+            {/* Tier 2: Pro */}
+            <SpotlightCard spotlightColor="var(--accent-purple-dim)" className="p-8 flex flex-col min-h-[450px] border-[var(--accent-purple)] relative">
+              <div className="absolute top-0 right-0 bg-[var(--accent-purple)] text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg rounded-tr-xl uppercase tracking-widest">First 100 Free</div>
+              <h3 className="font-display text-[24px] font-bold text-[var(--text-primary)] mb-2">Pro</h3>
+              <div className="font-display text-[48px] font-bold text-[var(--text-primary)] mb-4 flex items-baseline">
+                <span className="line-through text-[var(--text-faint)] text-[32px] mr-3 decoration-[var(--accent-purple)]">₹199</span>₹0<span className="text-[16px] text-[var(--text-muted)] font-normal tracking-normal">/mo</span>
+              </div>
+              <p className="text-[16px] text-[var(--text-muted)] mb-8 flex-1">
+                For serious contributors building a placement portfolio. <br/><span className="text-[var(--accent-purple)] font-medium text-[13px] mt-2 block">Early adopter offer applied.</span>
+              </p>
+              <ul className="space-y-4 mb-8 text-[14px] text-[var(--text-primary)] font-medium">
+                <li className="flex items-center gap-3"><Zap size={16} className="text-[var(--accent-purple)]" /> Unlimited AI PR checks</li>
+                <li className="flex items-center gap-3"><Zap size={16} className="text-[var(--accent-purple)]" /> Instant priority scoring</li>
+                <li className="flex items-center gap-3"><Zap size={16} className="text-[var(--accent-purple)]" /> Extended analytics</li>
+                <li className="flex items-center gap-3"><Zap size={16} className="text-[var(--accent-purple)]" /> PDF Portfolio Export</li>
+              </ul>
+              <button className="w-full py-3 rounded-lg bg-[var(--accent-purple)] hover:bg-[var(--accent-purple)]/90 text-white font-bold transition-all" onClick={signIn}>Claim Free Pro</button>
+            </SpotlightCard>
+
+            {/* Tier 3: Repo Certification */}
+            <SpotlightCard spotlightColor="var(--accent-blue-dim)" className="p-8 flex flex-col min-h-[450px]">
+              <h3 className="font-display text-[24px] font-bold text-[var(--text-primary)] mb-2">Enterprise</h3>
+              <div className="font-display text-[48px] font-bold text-[var(--text-primary)] mb-4">₹5k<span className="text-[16px] text-[var(--text-muted)] font-normal tracking-normal">/mo</span></div>
+              <p className="text-[16px] text-[var(--text-muted)] mb-8 flex-1">
+                For open source projects attracting top contributors.
+              </p>
+              <ul className="space-y-4 mb-8 text-[14px] text-[var(--text-primary)] font-medium">
+                <li className="flex items-center gap-3"><Activity size={16} className="text-[var(--accent-blue)]" /> Certified Badge on Feed</li>
+                <li className="flex items-center gap-3"><Activity size={16} className="text-[var(--accent-blue)]" /> Contributor Pipeline Dashboard</li>
+                <li className="flex items-center gap-3"><Activity size={16} className="text-[var(--accent-blue)]" /> Dedicated listing page</li>
+                <li className="flex items-center gap-3"><Activity size={16} className="text-[var(--accent-blue)]" /> Custom AI rules</li>
+              </ul>
+              <button className="w-full py-3 rounded-lg border border-[var(--border)] bg-[var(--bg-primary)] hover:bg-[var(--bg-card-hover)] text-[var(--text-primary)] font-bold transition-all">Contact Sales</button>
+            </SpotlightCard>
           </div>
         </section>
 
