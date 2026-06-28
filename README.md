@@ -1,8 +1,8 @@
-# FirstMerge (mergeMate)
+# FirstMerge 
 
 FirstMerge is an AI-powered open-source contribution companion. It helps beginner and intermediate developers find beginner-friendly open-source issues and ensures their Pull Requests (PRs) get merged instead of rejected or ignored.
 
-## 🎯 Core Features
+## Core Features
 
 - **Friendliness Score Engine**: Calculates a precise 0–100 score for repositories using real-time GitHub data, analyzing PR collision count, beginner PR merge rate, maintainer response time, and issue freshness.
 - **AI-Powered PR Quality Check**: Acts as an automated senior engineer reviewing code *before* maintainers do. Analyzes the code diff, original issue body, and CONTRIBUTING.md file to provide a verdict (`GENUINE` or `TRIVIAL`) and actionable suggestions.
@@ -10,13 +10,13 @@ FirstMerge is an AI-powered open-source contribution companion. It helps beginne
 - **Seamless Chrome Extension**: Integrates directly into GitHub. Automatically analyzes PRs and injects a FirstMerge dashboard into the GitHub PR discussion timeline.
 - **Gamification**: Turns open-source contribution into a game with contribution heatmaps, streak tracking, and medals.
 
-## 📂 Project Structure
+## Project Structure
 
 - `/frontend` - The web application frontend (dashboard, explore page).
 - `/backend` - The backend API handling authentication, GitHub API interactions, and AI integrations.
 - `/extension` - The Chrome extension that injects into GitHub pull request pages.
 
-## 🚀 Installation & Setup
+## Installation & Setup
 
 ### Prerequisites
 - Node.js
