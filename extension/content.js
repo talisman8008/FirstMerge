@@ -277,20 +277,20 @@ async function analyzePRAutomatically() {
 }
 
 function initAutoAnalyzer() {
-  analyzePRAutomatically();
+  // Run on initial load
+  if (window.location.href.includes('/compare/')) {
+    analyzePRAutomatically();
+  }
 
-  // Handle GitHub's SPA navigation (Turbo/pjax)
-  let lastUrl = location.href; 
+  // Handle GitHub's SPA navigation and dynamic DOM rendering
   new MutationObserver(() => {
-    const currentUrl = location.href;
-    if (currentUrl !== lastUrl) {
-      lastUrl = currentUrl;
-      if (currentUrl.includes('/compare/')) {
-        setTimeout(analyzePRAutomatically, 1000);
-      }
+    if (window.location.href.includes('/compare/')) {
+      // It's safe to call this frequently because analyzePRAutomatically 
+      // checks if the banner already exists before injecting.
+      analyzePRAutomatically();
     }
   }).observe(document.body, { childList: true, subtree: true });
 }
 
-// Wait for GitHub's DOM to be ready
-setTimeout(initAutoAnalyzer, 1000);
+// Start observing immediately
+initAutoAnalyzer();
