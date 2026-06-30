@@ -3,7 +3,7 @@
 FirstMerge is an intelligent open-source onboarding platform that helps beginners find their first open-source issues, evaluate repository friendliness, and generate AI-driven step-by-step roadmaps to solve bugs with confidence. It also includes a Chrome Extension for real-time PR analysis natively on GitHub.
 
 ## 🚀 Deployed Links
-- **Web Platform:** [Insert Vercel URL Here]
+- **Web Platform:** www.firstmerge.app/ 
 - **API Backend:** https://mergemate-production-59be.up.railway.app
 - **Chrome Extension:** Load unpacked from the `/extension` directory.
 
