@@ -1,4 +1,4 @@
-# FirstMerge (formerly MergeMate)
+# FirstMerge 
 
 FirstMerge is an intelligent open-source onboarding platform that helps beginners find their first open-source issues, evaluate repository friendliness, and generate AI-driven step-by-step roadmaps to solve bugs with confidence. It also includes a Chrome Extension for real-time PR analysis natively on GitHub.
 
@@ -77,6 +77,11 @@ npm run dev
 <a href="https://github.com/talisman8008/FirstMerge/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=talisman8008/FirstMerge" alt="FirstMerge contributors" />
 </a>
+
+| Contributor | Focus Area |
+|---|---|
+| [Talisman](https://github.com/talisman8008) | Backend, auth/security architecture, AI integration, explore page |
+| [Anki](https://github.com/ankidharmani-tech) | Landing page, FTUE, Chrome extension, explore page |
 
 ---
 *Built to empower the next generation of open-source contributors.*
