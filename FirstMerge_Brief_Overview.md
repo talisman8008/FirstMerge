@@ -65,4 +65,3 @@ React + Vite frontend, Node + Express backend, Supabase for auth and caching, Gi
 
 ---
 
-*FirstMerge — Built for HackVerse 2026.*
