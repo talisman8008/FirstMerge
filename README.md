@@ -1,4 +1,4 @@
-# FirstMerge 
+# FirstMerge (formerly MergeMate)
 
 FirstMerge is an intelligent open-source onboarding platform that helps beginners find their first open-source issues, evaluate repository friendliness, and generate AI-driven step-by-step roadmaps to solve bugs with confidence. It also includes a Chrome Extension for real-time PR analysis natively on GitHub.
 
