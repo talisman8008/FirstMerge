@@ -55,11 +55,12 @@ export default function MergeField({ drawnY, className = "" }) {
   // Master path progress mapped perfectly to Y coordinates
   const pathLengthMain = useTransform(drawnY, [0, 5500], [0, 1]);
   // Blue path: cy starts at 200, ends at 1100
-  const pathLengthBlue = useTransform(drawnY, [200, 1100], [0, 1]);
+  // Mapped piecewise to keep Y-velocity constant through curves
+  const pathLengthBlue = useTransform(drawnY, [200, 300, 1000, 1100], [0, 0.173, 0.827, 1]);
   // Green path: cy starts at 400, ends at 800
-  const pathLengthGreen = useTransform(drawnY, [400, 800], [0, 1]);
+  const pathLengthGreen = useTransform(drawnY, [400, 500, 700, 800], [0, 0.325, 0.675, 1]);
   // Energy path: cy starts at 1200, ends at 5500
-  const pathLengthEnergy = useTransform(drawnY, [1200, 5500], [0, 1]);
+  const pathLengthEnergy = useTransform(drawnY, [1200, 1400, 5500], [0, 0.092, 1]);
 
   const pathMain = "M 800 0 L 800.1 5500";
   const pathBlue = "M 800 200 C 800 250, 950 250, 950 300 L 950 1000 C 950 1050, 800 1050, 800 1100";

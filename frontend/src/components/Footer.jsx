@@ -7,21 +7,7 @@ const GitHubIcon = () => (
   </svg>
 );
 
-const TwitterIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path>
-  </svg>
-);
 
-const DiscordIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M5.5 16c-1.5 0-3-1.5-3-3s1.5-3 3-3 3 1.5 3 3-1.5 3-3 3z"></path>
-    <path d="M18.5 16c-1.5 0-3-1.5-3-3s1.5-3 3-3 3 1.5 3 3-1.5 3-3 3z"></path>
-    <path d="M8.5 20c-1.5 0-3-1.5-3-3s1.5-3 3-3 3 1.5 3 3-1.5 3-3 3z"></path>
-    <path d="M15.5 20c-1.5 0-3-1.5-3-3s1.5-3 3-3 3 1.5 3 3-1.5 3-3 3z"></path>
-    <circle cx="12" cy="12" r="10"></circle>
-  </svg>
-);
 
 export default function Footer() {
   const [theme, setTheme] = useState(
@@ -62,14 +48,8 @@ export default function Footer() {
             Helping developers make their very first open-source contribution through AI-curated issues, step-by-step roadmaps, and PR analysis.
           </p>
           <div className="flex items-center gap-4 text-[var(--text-faint)]">
-            <a href="https://github.com/FirstMerge" target="_blank" rel="noreferrer" className="hover:text-[var(--text-primary)] transition-colors">
+            <a href="https://github.com/talisman8008/FirstMerge" target="_blank" rel="noreferrer" className="hover:text-[var(--text-primary)] transition-colors">
               <GitHubIcon />
-            </a>
-            <a href="#" className="hover:text-[var(--text-primary)] transition-colors">
-              <TwitterIcon />
-            </a>
-            <a href="#" className="hover:text-[var(--text-primary)] transition-colors">
-              <DiscordIcon />
             </a>
           </div>
         </div>
@@ -82,11 +62,18 @@ export default function Footer() {
           <a href="#" className="font-sans text-[14px] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors">Chrome Extension</a>
         </div>
 
-        <div className="col-span-1 flex flex-col gap-3">
-          <h4 className="font-mono text-[12px] font-bold uppercase tracking-wider text-[var(--text-primary)] mb-2">Legal</h4>
-          <a href="#" className="font-sans text-[14px] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors">Privacy Policy</a>
-          <a href="#" className="font-sans text-[14px] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors">Terms of Service</a>
-          <a href="#" className="font-sans text-[14px] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors">Open Source License</a>
+        <div className="col-span-1 flex flex-col gap-4">
+          <h4 className="font-mono text-[12px] font-bold uppercase tracking-wider text-[var(--text-primary)] mb-1">Contact</h4>
+          <div className="flex flex-col gap-1">
+            <span className="font-sans text-[14px] font-medium text-[var(--text-primary)]">Devesh Hegde</span>
+            <a href="https://www.linkedin.com/in/devesh-hegde-91506138b/" target="_blank" rel="noreferrer" className="font-sans text-[13px] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors">LinkedIn Profile</a>
+            <a href="mailto:deveshhegde04@gmail.com" className="font-sans text-[13px] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors">deveshhegde04@gmail.com</a>
+          </div>
+          <div className="flex flex-col gap-1">
+            <span className="font-sans text-[14px] font-medium text-[var(--text-primary)]">Ankita Dharmani</span>
+            <a href="https://www.linkedin.com/in/ankita-dharmani/" target="_blank" rel="noreferrer" className="font-sans text-[13px] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors">LinkedIn Profile</a>
+            <a href="mailto:anki.dharmani@gmail.com" className="font-sans text-[13px] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors">anki.dharmani@gmail.com</a>
+          </div>
         </div>
 
       </div>

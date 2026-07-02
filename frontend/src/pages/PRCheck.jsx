@@ -253,16 +253,19 @@ export default function PRCheck({ user, signIn, signOut }) {
       </div>
 
       <div className="w-full max-w-[1200px] mx-auto px-6 py-20 flex flex-col items-center justify-center text-center mt-10">
-        <h1 className="text-[40px] md:text-[56px] font-sans font-semibold tracking-tight text-[var(--text-primary)] mb-6">
+        <h1 className="text-[40px] md:text-[56px] font-sans font-semibold tracking-tight text-[var(--text-primary)] mb-4">
           PR Check is now an Extension
         </h1>
+        <div className="mb-8 px-4 py-1.5 bg-[var(--accent-purple)]/20 text-[var(--accent-purple)] rounded-full text-[15px] font-medium border border-[var(--accent-purple)]/30">
+          Launching soon on Chrome Web Store
+        </div>
         <div className="max-w-[600px] bg-[var(--bg-card)] border-2 border-[var(--border)] rounded-xl p-10 shadow-lg mx-auto">
           <p className="font-sans text-[18px] text-[var(--text-muted)] leading-relaxed mb-8">
             The PR Check functionality has been upgraded and moved into our dedicated Chrome Extension for a more seamless experience directly on GitHub.
           </p>
-          <div className="p-4 bg-[color-mix(in_srgb,var(--accent-blue)_10%,transparent)] border border-[color-mix(in_srgb,var(--accent-blue)_20%,transparent)] rounded-lg">
-            <p className="font-sans text-[16px] text-[var(--text-primary)] font-medium">
-              <strong className="text-[var(--accent-blue)]">Mentors & Judges:</strong> Please refer to the video demonstration to see the extension in action!
+          <div className="p-4 bg-[color-mix(in_srgb,var(--text-muted)_10%,transparent)] border border-[var(--border)] rounded-lg">
+            <p className="font-sans text-[15px] text-[var(--text-primary)] font-medium">
+              Want to try it now? To download and install the extension locally, please see the <a href="https://github.com/talisman8008/FirstMerge#readme" target="_blank" rel="noreferrer" className="text-[var(--accent-blue)] hover:underline">project README</a>.
             </p>
           </div>
         </div>
