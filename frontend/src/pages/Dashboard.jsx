@@ -628,7 +628,7 @@ export default function Dashboard({ user, signIn, signOut }) {
                     <div className="flex items-center justify-center h-full text-[var(--text-muted)] text-sm">No recent contributions</div>
                   )}
                 </div>
-                <br />
+
                 {/* Legend Container (Right) */}
                 <div className="flex flex-col justify-center gap-4 w-[130px] pl-4">
                   {split.map((entry, idx) => (
