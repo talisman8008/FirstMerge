@@ -80,7 +80,7 @@ export default function Footer() {
 
       <div className="max-w-6xl mx-auto px-6 border-t border-[var(--border)] pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
         <p className="font-mono text-[12px] text-[var(--text-faint)]">
-          &copy; {new Date().getFullYear()} FirstMerge. Made for Hackverse 2026.
+          &copy; {new Date().getFullYear()} FirstMerge
         </p>
         <p className="font-sans text-[12px] text-[var(--text-muted)] flex items-center gap-1">
           Made with <span className="text-[var(--accent-purple)]">♥</span> by Team Amor Fati.
