@@ -68,7 +68,7 @@ export const seedActivity = {
     const d = new Date();
     d.setDate(d.getDate() - (365 - i));
     const isActivity = Math.random() < (90 / 365);
-    const weight = i / 365; 
+    const weight = i / 365;
     let count = 0;
     if (isActivity) {
       count = Math.floor(Math.random() * 3 * weight) + 1;
@@ -230,7 +230,7 @@ export default function Dashboard({ user, signIn, signOut }) {
       localStorage.setItem('hasSeenDashboardTour', 'true');
     }
   };
-  
+
   const [isDemoMode, setIsDemoMode] = useState(
     localStorage.getItem('dashboardMode') !== 'real'
   )
@@ -413,15 +413,15 @@ export default function Dashboard({ user, signIn, signOut }) {
       </div>
 
       <div className="relative z-[9999999]">
-        <FTUETour 
+        <FTUETour
           key={tourKey}
-          run={runTour} 
-          steps={dashboardTourSteps} 
-          onJoyrideStateChange={handleJoyrideStateChange} 
+          run={runTour}
+          steps={dashboardTourSteps}
+          onJoyrideStateChange={handleJoyrideStateChange}
         />
-        <ShareCardModal 
-          isOpen={isShareModalOpen} 
-          onClose={() => setIsShareModalOpen(false)} 
+        <ShareCardModal
+          isOpen={isShareModalOpen}
+          onClose={() => setIsShareModalOpen(false)}
           profile={profile}
           stats={{
             openPRs: isDemoMode ? seedDashData.openPRs.length : (mergedPrs.recentOpen?.length || 0),
@@ -442,7 +442,7 @@ export default function Dashboard({ user, signIn, signOut }) {
       {error && <div className="p-4 text-red-600 text-center">{error}</div>}
 
       <div className="max-w-[2880px] mx-auto px-8 pt-6 pb-2 flex justify-end items-center gap-3">
-        <button 
+        <button
           onClick={() => {
             localStorage.removeItem('hasSeenDashboardTour')
             setTourKey(Date.now())
@@ -464,10 +464,10 @@ export default function Dashboard({ user, signIn, signOut }) {
       </div>
 
       <div className="max-w-[2880px] mx-auto px-8 pb-8 flex flex-col md:flex-row gap-8">
-        
+
         {/* Left Sidebar */}
         <div className="w-full md:w-[300px] flex-shrink-0 flex flex-col gap-8">
-          
+
           {/* User Info */}
           <div className="flex items-center gap-4">
             {isDemoMode ? (
@@ -513,34 +513,35 @@ export default function Dashboard({ user, signIn, signOut }) {
                 const isLocked = !m.achieved;
                 const remaining = m.target - (m.type === 'commits' ? totalCommits : totalOS);
                 const unlockText = m.type === 'commits' ? `Make ${remaining} commits to unlock` : `Close ${remaining} issues to unlock`;
-                
+
                 return (
-                <div key={idx} className="h-16 flex flex-col items-center justify-center group relative cursor-help">
-                  <div className={`${idx === 0 ? 'w-16 h-16' : 'w-14 h-14'} rounded-full flex items-center justify-center relative ${m.achieved ? 'bg-[var(--bg-card)] shadow-[0_0_10px_rgba(35,134,54,0.3)] ring-2 ring-[var(--accent-green)]' : 'bg-[var(--bg-primary)]'} transition-all duration-300 group-hover:scale-110`}>
-                    <img 
-                      src={m.image} 
-                      alt={m.name} 
-                      className={`${idx === 0 ? 'w-16 h-16 scale-110' : 'w-11 h-11'} object-contain transition-all duration-300 ${m.achieved ? 'drop-shadow-md' : 'grayscale opacity-40 blur-[0.5px]'}`} 
-                    />
-                    {isLocked && (
-                      <span className="absolute text-xl drop-shadow-md z-10" title="Locked">🔒</span>
-                    )}
-                  </div>
-                  
-                  {/* Tooltip */}
-                  <div className="absolute top-full mt-3 w-32 bg-[var(--bg-card-hover)] text-[var(--text-primary)] text-xs p-2.5 rounded shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-20 text-center pointer-events-none">
-                    <p className="font-bold mb-1">{m.name}</p>
-                    <p className="text-[var(--text-primary)] mb-2 text-[10px]">{m.desc}</p>
-                    <div className="w-full bg-[var(--border)] h-1.5 rounded-full overflow-hidden">
-                      <div className="bg-[var(--accent-amber)] h-full transition-all duration-1000" style={{ width: `${(parseInt(m.progress.split('/')[0]) / parseInt(m.progress.split('/')[1])) * 100}%` }}></div>
+                  <div key={idx} className="h-16 flex flex-col items-center justify-center group relative cursor-help">
+                    <div className={`${idx === 0 ? 'w-16 h-16' : 'w-14 h-14'} rounded-full flex items-center justify-center relative ${m.achieved ? 'bg-[var(--bg-card)] shadow-[0_0_10px_rgba(35,134,54,0.3)] ring-2 ring-[var(--accent-green)]' : 'bg-[var(--bg-primary)]'} transition-all duration-300 group-hover:scale-110`}>
+                      <img
+                        src={m.image}
+                        alt={m.name}
+                        className={`${idx === 0 ? 'w-16 h-16 scale-110' : 'w-11 h-11'} object-contain transition-all duration-300 ${m.achieved ? 'drop-shadow-md' : 'grayscale opacity-40 blur-[0.5px]'}`}
+                      />
+                      {isLocked && (
+                        <span className="absolute text-xl drop-shadow-md z-10" title="Locked">🔒</span>
+                      )}
                     </div>
-                    <p className="mt-1 text-[10px] text-[var(--text-primary)]">
-                      {m.achieved ? m.progress : unlockText}
-                    </p>
-                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 border-[6px] border-transparent border-b-[var(--bg-card-hover)]"></div>
+
+                    {/* Tooltip */}
+                    <div className="absolute top-full mt-3 w-32 bg-[var(--bg-card-hover)] text-[var(--text-primary)] text-xs p-2.5 rounded shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-20 text-center pointer-events-none">
+                      <p className="font-bold mb-1">{m.name}</p>
+                      <p className="text-[var(--text-primary)] mb-2 text-[10px]">{m.desc}</p>
+                      <div className="w-full bg-[var(--border)] h-1.5 rounded-full overflow-hidden">
+                        <div className="bg-[var(--accent-amber)] h-full transition-all duration-1000" style={{ width: `${(parseInt(m.progress.split('/')[0]) / parseInt(m.progress.split('/')[1])) * 100}%` }}></div>
+                      </div>
+                      <p className="mt-1 text-[10px] text-[var(--text-primary)]">
+                        {m.achieved ? m.progress : unlockText}
+                      </p>
+                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 border-[6px] border-transparent border-b-[var(--bg-card-hover)]"></div>
+                    </div>
                   </div>
-                </div>
-              )})}
+                )
+              })}
             </div>
           </div>
 
@@ -592,7 +593,7 @@ export default function Dashboard({ user, signIn, signOut }) {
 
         {/* Main Content */}
         <div className="flex-1 flex flex-col gap-6">
-          
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* User Stats Box (now Contribution Split) */}
             <div id="tour-split" className="border border-[var(--border)] rounded-xl p-6 min-h-[200px] flex flex-col" style={{ backgroundColor: 'var(--bg-card)' }}>
@@ -617,7 +618,7 @@ export default function Dashboard({ user, signIn, signOut }) {
                             <Cell key={`cell-${index}`} fill={entry.color} />
                           ))}
                         </Pie>
-                        <Tooltip 
+                        <Tooltip
                           contentStyle={{ backgroundColor: 'var(--bg-card)', borderRadius: '8px', border: '1px solid var(--border)', fontSize: '12px', padding: '4px 8px' }}
                           itemStyle={{ color: 'var(--text-primary)', fontWeight: '500' }}
                         />
@@ -627,12 +628,12 @@ export default function Dashboard({ user, signIn, signOut }) {
                     <div className="flex items-center justify-center h-full text-[var(--text-muted)] text-sm">No recent contributions</div>
                   )}
                 </div>
-
+                <br />
                 {/* Legend Container (Right) */}
                 <div className="flex flex-col justify-center gap-4 w-[130px] pl-4">
                   {split.map((entry, idx) => (
                     <div key={idx} className="flex items-center gap-3 text-sm font-medium text-[var(--text-muted)]">
-                      <div className="w-4 h-4 rounded-full" style={{ backgroundColor: entry.color }}></div>
+                      <div className="w-4 h-4  rounded-full" style={{ backgroundColor: entry.color }}></div>
                       {entry.name}
                     </div>
                   ))}
@@ -674,8 +675,8 @@ export default function Dashboard({ user, signIn, signOut }) {
             {loadingMergedPrs && !isDemoMode ? (
               <div className="h-[200px] w-full animate-pulse bg-[var(--border)] rounded-md"></div>
             ) : (
-              <Heatmap 
-                data={displayedHeatmap} 
+              <Heatmap
+                data={displayedHeatmap}
                 totalIssues={displayedHeatmapTotal}
                 activeDays={displayedHeatmapActiveDays}
                 isDemoMode={isDemoMode}
@@ -725,7 +726,7 @@ export default function Dashboard({ user, signIn, signOut }) {
           <div id="tour-saved-issues" className="border border-[var(--border)] rounded-xl p-6" style={{ backgroundColor: 'var(--bg-card)' }}>
             <div className="flex gap-8 border-b border-[var(--border)] pb-4 mb-4">
               {['Saved', 'Open PR', 'Closed PRs'].map(tab => (
-                <button 
+                <button
                   key={tab}
                   type="button"
                   onClick={(e) => {
@@ -740,14 +741,14 @@ export default function Dashboard({ user, signIn, signOut }) {
                 </button>
               ))}
             </div>
-            
+
             <div className="space-y-3">
               {(displayedIssues || []).map((issue, idx) => (
                 <div key={idx} className="flex justify-between items-center p-4 rounded-md border border-[var(--border)] group" style={{ backgroundColor: 'var(--bg-card)' }}>
                   <span className="text-sm font-medium uppercase truncate pr-4">{issue.repo_name} - {issue.issue_title}</span>
                   <div className="flex gap-4 items-center shrink-0">
                     {activeTab === 'Saved' && !isDemoMode && issue.id && (
-                      <button 
+                      <button
                         onClick={() => handleUnsave(issue.id)}
                         className="text-[12px] font-bold text-red-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity uppercase tracking-wider"
                       >
